@@ -1,21 +1,14 @@
 ﻿---
 import Layout from "../layouts/Layout.astro";
-import ContactPage from "../components/websites/ExteriorBuilderServices/pages/EBS-Contact";
-import { CLIENT } from "../components/websites/ExteriorBuilderServices/config/client.config";
+import ContactPage from "../components/websites/EdsTreeService/pages/EdsTree-Contact";
+import { CLIENT } from "../components/websites/EdsTreeService/config/client.config";
 
 const seo = {
   title: `Contact Us | ${CLIENT.business.name} | ${CLIENT.seo.regionLabel}`,
-  // Rewritten for EBS 2026-09-01. The title was already tokenised and correct;
-  // the description was untouched previous-client copy — "schedule tree service
-  // in Durham, Chapel Hill, and the Triangle, NC". Banned and stale copy in a
-  // <meta> tag is invisible on screen, which is how it survived (root §13.10.7).
-  // RESOLVED 2026-09-02: /offers was deleted and /privacy rewritten, so no
-  // route now carries previous-client metadata. The og:image 404 was closed
-  // the same day — CLIENT.seo.ogImage now points at /og/default.jpg, a
-  // prerendered route that renders the card in
-  // components/websites/ExteriorBuilderServices/og/ at build time.
+  // Claims surface (root §13.10.7): every word here passes the register in
+  // EdsTreeService_HANDOFF_Step0-Step1.md §3.
   description:
-    `Get a free estimate on roofing, siding or gutters across ${CLIENT.geo.serviceArea}. Call, email or send the form — ${CLIENT.business.nameShort} is licensed, bonded and insured.`,
+    `Get a free estimate on tree removal, trimming, stump grinding or storm clean-up across ${CLIENT.geo.serviceArea}. Call, email or send the form — ${CLIENT.business.nameShort} is bonded and insured.`,
 };
 ---
 

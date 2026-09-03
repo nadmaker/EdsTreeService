@@ -1,15 +1,18 @@
-﻿/* =========================================
-   Medranos — global.css
-   
-   Token system docs: see CLAUDE.md → "Token System" section
-   
+/* =========================================
+   Ed's Tree Service — global.css
+
+   Token system docs: root CLAUDE.md §4 ("The Two-Layer Token System")
+
    File structure:
    1. Tailwind v4 entry
-   2. Subframe theme tokens (auto-generated, don't edit theme.css directly)
-   3. Brand color overrides for body.theme-medranos
-   4. Typography token overrides for body.theme-medranos
-   5. Prose baseline rules
-   6. Scoped fixes for stubborn Subframe specificity
+   2. Subframe theme tokens (auto-generated — never edit theme.css directly)
+   3. Brand + typography overrides for body.theme-edstree (the per-client layer)
+   4. Root-level clearance tokens and keyframes (template-shared mechanics)
+   5. Scoped fixes for stubborn Subframe specificity (client-scoped)
+
+   The previous clients' theme blocks were removed in
+   the Ed's fork on 2026-09-03 — no route applies either class here, so every
+   rule under them was dead weight shipped on every page.
    ========================================= */
 
 /* 1. Tailwind v4 entry (MUST be first) */
@@ -19,411 +22,151 @@
 @import "../ui/theme.css";
 
 /* =========================================
-   3. Medranos Brand Theme — Color Overrides
-   
-   Source of truth for color VALUES: THIS FILE
-   Source of truth for color SLOTS: src/ui/theme.css (Subframe)
-   
-   This block overrides the slot defaults from theme.css with
-   Medrano's actual brand values. When forking for a new client,
-   this is the file to edit — leave theme.css alone.
-   
-   ── Subframe slot reuse (C2 pattern) ──
-   --color-default-background and --color-default-font are Subframe
-   SYSTEM tokens. We deliberately override them here to carry
-   Medrano's neutrals, because Subframe components consume these
-   tokens internally and we want those components to render with
-   our brand neutrals.
-   
-   Mental model:
-     --color-default-background → "Medrano's page background"
-     --color-default-font       → "Medrano's body text color"
-   
-   If you need a different value just for body text without
-   affecting Subframe components, do NOT change these — add
-   a new slot instead.
+   3. Ed's Tree Service — Brand Theme
+   Color + Typography Overrides for body.theme-edstree
+
+   Source of truth for color VALUES: THIS FILE (from the style guide,
+   "Sawdust" direction, received 2026-09-03 — reconciled in
+   src/components/websites/EdsTreeService/EdsTreeService_HANDOFF_Step0-Step1.md §6).
+   Source of truth for color SLOTS: src/ui/theme.css (Subframe).
+
+   ── Subframe slot reuse (C2 pattern, root §4.5) ──
+   --color-default-background and --color-default-font are Subframe SYSTEM
+   tokens, deliberately overridden here so Subframe components render with
+   this client's neutrals.
+
+   ── Usage rules from the style guide (§4), enforced by hand ──
+   · Green is the TEXT colour; amber is a FILL colour. Never swap jobs.
+   · Amber CTA labels are --color-default-font, never white (2.55:1).
+   · Amber is never text, a border, a divider or a focus ring on the page
+     background (2.37:1), and never sits inside a primary-green section
+     (2.14:1). Inside green sections the accent is --color-default-background.
+   · Reverse-out bands fill with --color-brand-primary-hover and set their
+     text in --color-default-background (6.71:1).
+   · Captions use neutral-600 (7.26:1), never neutral-500 (4.41:1 — misses AA).
+   · Cards are white, not neutral-200 (primary on neutral-200 is 4.33:1).
    ========================================= */
-body.theme-medranos,
-.theme-medranos {
-  /* ── Brand colors ── */
-  --color-brand-primary: rgb(0, 130, 45);
-  --color-brand-primary-secondary-tone: rgb(75, 166, 106);
-  --color-brand-primary-hover: rgb(0, 105, 36);
+body.theme-edstree {
+  /* ── Brand — style guide tokens 1-3, 5-6 and the derived ninth ── */
+  --color-brand-primary:                  rgb(24, 122, 38);    /* #187A26 — white on it 5.45:1 */
+  --color-brand-primary-hover:            rgb(20, 101, 31);    /* #14651F — L−5; white on it 7.21:1 */
+  --color-brand-secondary:                rgb(230, 142, 28);   /* #E68E1C — FILLS ONLY; dark labels 6.48:1 */
+  --color-brand-secondary-hover:          rgb(210, 128, 23);   /* #D28017 — L−5; dark labels 5.37:1 */
+  /* The guide proposes NO tertiary (§5). This slot carries the guide's own
+     derived fallback only because template wrappers already consume
+     --color-brand-tertiary (the concrete-ground set-out lines, secondary UI).
+     Primary hue at low saturation, 4.73:1 on the background. */
+  --color-brand-tertiary:                 rgb(89, 117, 93);    /* #59755D */
 
- --color-brand-secondary: rgb(205, 74, 39);
-  /* TODO: revisit value — flagged as too muted in services grid context.
-     Pick replacement using HSB workflow (lock H ~12°, adjust S/B). */
-  --color-brand-secondary-secondary-tone: rgb(191, 97, 71);
-  --color-brand-secondary-hover: rgb(183, 65, 34);
-
-  /* Legacy ramp slots — kept in sync with brand-primary for any
-     Subframe components that consume the raw ramp directly */
-  --color-brand-500: rgb(35, 145, 75);
-  --color-brand-600: rgb(0, 130, 45);
-  --color-brand-700: rgb(0, 105, 36);
-
-  /* ── Neutrals (C2: override Subframe slots) ── */
-  --color-default-background: rgb(252, 251, 248);
-  --color-default-font: rgb(58, 58, 58);
-
-
-  /* ── Subheading text (new slot) ── */
-  --color-subheading-text: rgb(0, 0, 0);
-}
-
-/* =========================================
-   4. Typography token overrides
-   
-   These override Subframe's Work Sans defaults with Inter (body)
-   and Work Sans (headings) per Medrano's typography system.
-   ========================================= */
-body.theme-medranos,
-.theme-medranos {
-  --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-body-bold: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-caption: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-caption-bold: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-heading-1: "Work Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-heading-2: "Work Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-heading-3: "Work Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --font-monospace-body: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Courier New", monospace;
-}
-
-/* =========================================
-   Exterior Builder Services (EBS) — Brand Theme
-   Color + Typography Overrides for body.theme-ebs
-
-   Added per DUPLICATE.md Step 3 / root CLAUDE.md §4.6.
-   The body.theme-medranos block above is retained unmodified.
-
-   Values sourced from the EBS style guide (7 base tokens) plus
-   derived tints/ramp per the guide's HSL offset rule (hover = L-5,
-   secondary-tone = L+15, brand-500 = L+8). --color-brand-tertiary
-   and --color-brand-secondary-text are EBS-only slots (root
-   CLAUDE.md §4.3, second path) — no theme.css default exists for
-   either; consume both via arbitrary-value syntax, e.g.
-   text-[var(--color-brand-tertiary)].
-
-   --color-brand-secondary-text exists because gold (2.03 on
-   background) and its tint (1.58) both fail as text color — this
-   slot (L32, same hue/saturation) is the only gold that passes AA
-   normal (4.73) for text use. See client-scoped CLAUDE.md Open
-   Items for the wrapper-level retokenization work (Step 6) that
-   still needs to consume it.
-   ========================================= */
-body.theme-ebs {
-  /* ── Brand — from EBS style guide ── */
-  --color-brand-primary:                  rgb(22, 133, 204);   /* #1685CC */
-  --color-brand-primary-hover:            rgb(19, 118, 180);   /* #1376B4 — L−5 */
-  --color-brand-secondary:                rgb(221, 168, 44);   /* #DDA82C */
-  --color-brand-secondary-hover:          rgb(206, 155, 34);   /* #CE9B22 — L−5 */
-  --color-brand-tertiary:                 rgb(88, 116, 138);   /* #58748A — EBS-only slot */
-
-  /* ── Derived: L+15 tint ── */
-  --color-brand-primary-secondary-tone:   rgb(68, 170, 235);   /* #44AAEB — 2.40 on bg */
-  --color-brand-secondary-secondary-tone: rgb(232, 195, 110);  /* #E8C36E — 1.58, FILLS ONLY */
+  /* ── Derived: L+15 tints (fills only — 2.4 / 1.6 on the background) ── */
+  --color-brand-primary-secondary-tone:   rgb(37, 186, 59);    /* #25BA3B */
+  --color-brand-secondary-secondary-tone: rgb(238, 177, 97);   /* #EEB161 */
 
   /* ── Derived ramp: 50/100/200 = light tints, 500 = L+8, 600 = base, 700 = hover ──
-     theme.css's own defaults for brand-50/100/200 are Medrano's green ramp
-     (its placeholder values happen to be Medrano's real brand colors — see
-     root CLAUDE.md §4.1). Without an override here, any Subframe component
-     consuming border-brand-200 / bg-brand-50 directly (e.g. TrustHeadline_Ratings'
-     eyebrow pill) renders green on an EBS page. */
-  --color-brand-50:  rgb(241, 247, 251);
-  --color-brand-100: rgb(223, 239, 248);
-  --color-brand-200: rgb(192, 224, 244);
-  --color-brand-500: rgb(35, 155, 231);
-  --color-brand-600: rgb(22, 133, 204);
-  --color-brand-700: rgb(19, 118, 180);
+     theme.css's own defaults for brand-50/100/200 are the TEMPLATE's
+     placeholder green ramp (root §4.1). Overridden so any Subframe component
+     consuming border-brand-200 / bg-brand-50 directly picks up THIS green. */
+  --color-brand-50:  rgb(240, 249, 242);
+  --color-brand-100: rgb(221, 242, 225);
+  --color-brand-200: rgb(188, 228, 195);
+  --color-brand-500: rgb(31, 156, 49);
+  --color-brand-600: rgb(24, 122, 38);
+  --color-brand-700: rgb(20, 101, 31);
 
   /* ── Neutrals (C2 pattern, root §4.5) ── */
-  --color-default-background: rgb(245, 248, 251);   /* #F5F8FB */
-  --color-default-font:       rgb(23, 41, 58);      /* #17293A — 13.93 on bg */
-  --color-subheading-text:    rgb(23, 41, 58);
+  --color-default-background: rgb(237, 250, 239);   /* #EDFAEF */
+  --color-default-font:       rgb(11, 36, 14);      /* #0B240E — 15.34:1 on bg */
+  --color-subheading-text:    rgb(11, 36, 14);
 
-  /* ── EBS-only: readable gold for text ──
-     Gold is 2.03 on background and its tint is 1.58 — both fail as text.
-     Primary is 3.74, which also fails AA normal. This is the only gold
-     that works as readable text: same hue and saturation, L 32, 4.73 on bg.
-     Consume as text-[var(--color-brand-secondary-text)]. */
-  --color-brand-secondary-text: rgb(141, 105, 23);  /* #8D6917 */
+  /* ── Client slot: "secondary text" → PRIMARY GREEN ──
+     EBS filled this slot with a darkened gold so gold could carry type. The
+     Ed's style guide forbids amber as text at any size (§4 rule 3), so the
+     slot resolves to primary green — every former "accent text" consumer now
+     renders green (5.07:1 on the background) and NO amber text exists on the
+     site. Kept as a slot so the consumers need no edit if the rule changes. */
+  --color-brand-secondary-text: rgb(24, 122, 38);   /* = --color-brand-primary */
 
-  /* ── EBS-only: gold-foil gradient stops ──
-     Derived tints/shades of --color-brand-secondary, used ONLY by the
-     foil variant of the trust badges. Real tokens rather than literals
-     buried in the SVG, so a fork re-skins the foil with the rest of the
-     brand instead of leaving one badge in EBS gold.
+  /* ── Client slot: amber-foil gradient stops (trust badges, foil variant) ──
+     Text crosses every stop, so EVERY stop must clear 4.5:1 under
+     --color-default-font: deep 5.37 / light ~10.9 / peak ~13.6. Do not darken
+     the deep stop without re-checking. */
+  --color-brand-secondary-foil-deep:  rgb(210, 128, 23);   /* #D28017 */
+  --color-brand-secondary-foil-light: rgb(250, 208, 128);  /* #FAD080 */
+  --color-brand-secondary-foil-peak:  rgb(255, 236, 196);  /* #FFECC4 */
 
-     The DEEP stop is rgb(192,143,30) and not the darker rgb(166,124,24)
-     that reads better as metal: navy text measures 5.08:1 on this one and
-     only 3.90:1 on the darker, and the badge's 11px eyebrow needs 4.5:1.
-     The whole gradient has to clear AA, not just its mid-tones, because
-     text crosses every stop. Measured across all four: 5.08 / 6.86 /
-     11.47 / 13.34. Do not darken this without re-checking. */
-  --color-brand-secondary-foil-deep:  rgb(192, 143, 30);   /* #C08F1E */
-  --color-brand-secondary-foil-light: rgb(253, 224, 141);  /* #FDE08D */
-  --color-brand-secondary-foil-peak:  rgb(255, 243, 196);  /* #FFF3C4 */
-
-  /* ── EBS-only: cast-concrete ground (services grid) ──────────────────
-     The services section shipped as flat `bg-white`, which left it with no
-     surface at all — white cards on a white ground, nothing lifting, and a
-     seam that existed only as a few points of luminance against the
-     off-white sections either side. These tokens are the ground colour and
-     the four layers that replace it.
-
-     PROCEDURAL, and that is deliberate rather than incidental. The obvious
-     way to get concrete is a photograph, but this section explicitly
-     dropped `ebs-services-bg.jpg` because that import batch is still
-     suspected of being the PREVIOUS CLIENT's tree photography under EBS
-     filenames (handoff §6). A texture generated from a filter cannot carry
-     someone else's photo. It also costs zero network requests, is
-     resolution-independent, and keeps the section shipping no JavaScript.
-
-     Declared here rather than inline in the wrapper because Tailwind's
-     arbitrary-value parser cannot hold a data URI full of commas and
-     quotes without escaping that breaks on the next edit. The wrapper
-     consumes them as `bg-[image:var(--ebs-tex-cloud)]` — root §4.3's
-     second path: client-specific slots, arbitrary-value syntax, no
-     theme.css default and no Tailwind utility generated for them.
-
-     Each layer does one job:
+  /* ── Client slot: cast-concrete ground (services grid, /contact band) ──
+     PROCEDURAL textures, deliberately: a texture generated from a filter
+     cannot carry another company's photograph, costs zero requests, and is
+     resolution-independent. Declared here because Tailwind's arbitrary-value
+     parser cannot hold a data URI; consumed as
+     bg-[image:var(--site-tex-cloud)] (root §4.3 second path — client-scoped
+     slots, no generated utility).
 
        cloud  baseFrequency 0.013        soft mottling — the large structure
-       vein   baseFrequency 0.0035 0.08  ⚠️ ANISOTROPIC. The two-value form
-                                         stretches the noise horizontally
-                                         into trowel and scratch marks, and
-                                         is the whole reason this reads as
-                                         troweled plaster instead of a field
-                                         of speckle. Collapsing it to one
-                                         value silently turns it back into
-                                         grain. Do not "simplify" it.
-       lines  82px                       set-out lines at the rhythm of lap
-                                         siding and shingle courses — the
-                                         trade's own geometry, drawn in
-                                         brand-tertiary so it re-skins with
-                                         the palette rather than sitting at
-                                         a literal slate.
-       rake   radial white               daylight falling across the wall
-                                         from the top right. Without it the
-                                         texture reads as an even field of
-                                         noise rather than a lit surface.
+       vein   baseFrequency 0.0035 0.08  ⚠️ ANISOTROPIC: the two-value form
+                                         stretches the noise into trowel
+                                         marks. Collapsing it to one value
+                                         silently turns it back into grain.
+       lines  82px set-out lines         drawn in brand-tertiary via color-mix
+       rake   radial white               daylight across the wall, top right
 
-     `stitchTiles="stitch"` on all three turbulence layers is what makes
-     each tile repeat seamlessly; without it every tile edge shows as a
-     visible grid once the section is wider than one tile.
+     stitchTiles="stitch" on every turbulence layer is what makes each tile
+     repeat seamlessly. Opacity and tile size live on the consuming layer
+     divs, not here. */
+  --color-ground-concrete: rgb(231, 245, 233);  /* #E7F5E9 — one step below --color-default-background */
 
-     Opacity and tile size deliberately live on the wrapper's layer divs,
-     not here, so the texture can be tuned against the live page without
-     anyone having to edit a data URI. */
-  --color-ground-concrete: rgb(242, 245, 249);  /* #F2F5F9 — one step below
-     --color-default-background, so the band reads as its own surface
-     rather than as a continuation of the sections above and below it. */
-
-  --ebs-tex-cloud: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013' numOctaves='5' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='640' height='640' filter='url(%23c)'/%3E%3C/svg%3E");
-  --ebs-tex-vein:  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035 0.08' numOctaves='4' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='900' height='900' filter='url(%23v)'/%3E%3C/svg%3E");
-  --ebs-tex-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E");
+  --site-tex-cloud: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013' numOctaves='5' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='640' height='640' filter='url(%23c)'/%3E%3C/svg%3E");
+  --site-tex-vein:  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035 0.08' numOctaves='4' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='900' height='900' filter='url(%23v)'/%3E%3C/svg%3E");
+  --site-tex-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E");
 
   /* color-mix keeps the lines tied to --color-brand-tertiary instead of
      freezing a literal rgba (root §13.2.2). If color-mix ever fails to
      parse, this whole declaration goes invalid and the lines simply do not
-     paint — the concrete stays, so the failure is graceful rather than
-     broken. */
-  --ebs-course-lines: repeating-linear-gradient(
+     paint — the concrete stays, so the failure is graceful. */
+  --site-course-lines: repeating-linear-gradient(
     to bottom,
     color-mix(in srgb, var(--color-brand-tertiary) 13%, transparent) 0 1px,
     transparent 1px 82px
   );
 
-  --ebs-ground-rake: radial-gradient(
+  --site-ground-rake: radial-gradient(
     120% 90% at 88% 0%,
     rgba(255, 255, 255, 0.9) 0%,
     rgba(255, 255, 255, 0) 58%
   );
 
-  /* ── EBS-only: folded-paper creases ───────────────────────────────────
-     Large flat planes meeting along hard straight edges, each carrying its
-     own soft gradient. Replaces the shingle tile on the service-area
-     section, 2026-08-31, to a supplied reference.
+  /* ── Client slot: folded-paper creases (three arrangements) ──
+     ONE SHEET stretched across a section (preserveAspectRatio='none' +
+     background-size:100% 100%), never a tile. Hard edge BETWEEN facets, soft
+     gradient WITHIN each; ~6% at the strongest stop; every edge reaches the
+     boundary; black fills + mix-blend-multiply so the surface supplies the
+     hue and nothing here is frozen through a fork. Pair each with
+     --site-tex-grain — the shallow gradients band on 8-bit displays without
+     it. Three arrangements because two sections wearing the identical sheet
+     read as a repeated asset: creases (service-area, landing form),
+     creases-alt (why-choose-us), creases-faq (/about FAQ). */
+  --site-tex-creases: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.062'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.055'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.004'/%3E%3C/linearGradient%3E%3ClinearGradient id='c' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.058'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 470,0 0,600' fill='url(%23a)'/%3E%3Cpolygon points='620,0 900,0 350,900 70,900' fill='url(%23c)'/%3E%3Cpolygon points='1440,110 1440,900 840,900' fill='url(%23b)'/%3E%3Cpolygon points='1130,0 1440,0 1440,80' fill='url(%23a)'/%3E%3Cpolygon points='0,800 210,900 0,900' fill='url(%23b)'/%3E%3C/svg%3E");
+  --site-tex-creases-alt: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.060'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='e' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.052'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.004'/%3E%3C/linearGradient%3E%3ClinearGradient id='f' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.056'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 640,0 0,470' fill='url(%23d)'/%3E%3Cpolygon points='1440,0 1440,340 970,0' fill='url(%23f)'/%3E%3Cpolygon points='0,900 1440,560 1440,900' fill='url(%23e)'/%3E%3Cpolygon points='300,0 550,0 1010,900 760,900' fill='url(%23d)'/%3E%3Cpolygon points='0,610 260,900 0,900' fill='url(%23f)'/%3E%3C/svg%3E");
+  --site-tex-creases-faq: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='p' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.058'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='q' x1='1' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.054'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.003'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.050'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 380,0 900,900 520,900' fill='url(%23p)'/%3E%3Cpolygon points='380,0 700,0 1220,900 900,900' fill='url(%23q)'/%3E%3Cpolygon points='1440,0 1440,430 1010,0' fill='url(%23r)'/%3E%3Cpolygon points='1440,620 1440,900 1180,900' fill='url(%23p)'/%3E%3Cpolygon points='0,0 0,330 250,0' fill='url(%23q)'/%3E%3C/svg%3E");
 
-     A DIFFERENT FAMILY FROM EVERY OTHER TEXTURE HERE, and the difference is
-     structural rather than stylistic. Concrete and shingle are TILES: small,
-     repeated, seam-critical. This is ONE SHEET stretched across the whole
-     section — preserveAspectRatio='none' plus background-size:100% 100% —
-     so there is no tiling, no repeat seam, and no arithmetic to keep in
-     step. Creases run off every edge, which is what makes it read as a
-     single folded sheet rather than as shapes placed on a background.
-
-     What makes it read as FOLDED rather than as abstract diagonals:
-       · Hard edge BETWEEN facets, soft gradient WITHIN each one. That
-         combination is the entire illusion. Uniform fills read as flat
-         vector shapes; soft edges read as fog.
-       · Very low contrast — about 5% at the strongest stop. Any more and it
-         stops being paper and becomes graphic shapes.
-       · Edges that reach the boundary rather than terminating inside it.
-
-     ⚠️ Black fills with mix-blend-multiply, for the same reason as the other
-     textures: an SVG data URI cannot read a CSS custom property, so a colour
-     written here would be FROZEN through a fork. Black contributes only
-     darkness and the surface supplies the hue.
-
-     ⚠️ PAIR IT WITH A LITTLE GRAIN. These are large, very shallow gradients,
-     which is exactly the case 8-bit displays render as visible BANDING. A
-     few percent of noise over the top dithers it away. The grain is doing
-     technical work here, not decorative work — unlike on the concrete and
-     shingle grounds, where it was texture in its own right.
-
-     Roughly 900 bytes, versus 2.7 KB for the shingle tile it replaces. */
-  --ebs-tex-creases: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.062'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.055'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.004'/%3E%3C/linearGradient%3E%3ClinearGradient id='c' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.058'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 470,0 0,600' fill='url(%23a)'/%3E%3Cpolygon points='620,0 900,0 350,900 70,900' fill='url(%23c)'/%3E%3Cpolygon points='1440,110 1440,900 840,900' fill='url(%23b)'/%3E%3Cpolygon points='1130,0 1440,0 1440,80' fill='url(%23a)'/%3E%3Cpolygon points='0,800 210,900 0,900' fill='url(%23b)'/%3E%3C/svg%3E");
-
-  /* ── EBS-only: folded-paper creases, VARIANT B ────────────────────────
-     A second fold arrangement of the sheet above, added 2026-09-01 so the
-     why-choose-us band on the city landings can carry the same material as
-     the service-area section without being a copy of it. Two sections on
-     one page wearing the identical sheet reads as a repeated asset; two
-     different folds of the same paper reads as one surface.
-
-     SAME FAMILY, SAME RULES — this is a variant, not a new texture, so it
-     obeys everything the note above establishes and any edit here should
-     keep obeying it:
-       · Hard edge BETWEEN facets, soft gradient WITHIN each one. That
-         pairing is the whole illusion; uniform fills read as flat vector
-         shapes and soft edges read as fog.
-       · ~6% at the strongest stop, never more. Above that it stops being
-         paper and becomes graphic shapes.
-       · Every edge reaches the boundary. Facets that terminate inside the
-         frame read as placed objects rather than as folds in a sheet.
-       · Black fills + mix-blend-multiply. An SVG data URI cannot read a CSS
-         custom property, so a colour written here would be FROZEN through a
-         fork; black contributes only darkness and the surface supplies hue.
-       · Pair it with --ebs-tex-grain. These are large, very shallow
-         gradients — precisely the case 8-bit displays band across. The
-         grain is doing technical work, not decoration.
-
-     HOW IT DIFFERS, deliberately rather than incidentally: the long band
-     leans RIGHT as it descends where the original leans left, the top-right
-     corner carries a full facet instead of a sliver, and a wide shallow
-     fold runs along the bottom edge giving this variant a horizontal
-     emphasis the original does not have. Mirroring alone would have read as
-     the same sheet flipped.
-
-     ⚠️ NOT A TILE, same as its sibling: preserveAspectRatio='none' plus
-     background-size:100% 100%, so ONE sheet stretches over the section
-     however tall it gets. Do not give it a pixel background-size — that
-     turns it into a tile and the creases stop reaching the edges. */
-  --ebs-tex-creases-alt: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.060'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='e' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.052'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.004'/%3E%3C/linearGradient%3E%3ClinearGradient id='f' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.056'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 640,0 0,470' fill='url(%23d)'/%3E%3Cpolygon points='1440,0 1440,340 970,0' fill='url(%23f)'/%3E%3Cpolygon points='0,900 1440,560 1440,900' fill='url(%23e)'/%3E%3Cpolygon points='300,0 550,0 1010,900 760,900' fill='url(%23d)'/%3E%3Cpolygon points='0,610 260,900 0,900' fill='url(%23f)'/%3E%3C/svg%3E");
-
-  /* ── EBS-only: folded-paper creases, VARIANT C ──────────────────────
-     A THIRD fold of the same sheet, added 2026-09-01 for the /about FAQ
-     band, to a reference Ryan supplied for its BACKGROUND only.
-
-     ⚠️ WHY A THIRD ARRANGEMENT RATHER THAN REUSING ONE. Both siblings are
-     already spoken for — --ebs-tex-creases on the service-area section and
-     the city-landing form, --ebs-tex-creases-alt on the why-choose-us band.
-     The note on VARIANT B establishes the rule this follows: two sections
-     wearing the identical sheet reads as a repeated asset, two folds of the
-     same paper reads as one surface. /about would have been the third
-     wearing of whichever one was picked.
-
-     SAME FAMILY, SAME RULES. Every constraint from the two notes above
-     applies here and any edit must keep obeying them:
-       · Hard edge BETWEEN facets, soft gradient WITHIN each one.
-       · ~6% at the strongest stop, never more. This one peaks at 5.8%.
-       · Every edge reaches the boundary — facets that stop inside the frame
-         read as placed objects rather than as folds.
-       · Black fills + mix-blend-multiply. An SVG data URI cannot read a CSS
-         custom property, so a colour written here would be FROZEN through a
-         fork; black contributes only darkness and the ground supplies hue.
-       · Pair it with --ebs-tex-grain. Mandatory, not optional: these are
-         large very shallow gradients, exactly what 8-bit displays band.
-
-     HOW IT DIFFERS, deliberately. The reference's ground is built from
-     long PARALLEL diagonals rather than the scattered facets of the two
-     siblings, so this variant runs two nested chevrons across the full
-     height on one axis, with a counter-fold off the right edge to stop the
-     parallel bands reading as stripes. That is the visual quote from the
-     reference; the material, opacities and technique are ours.
-
-     ⚠️ NOT A TILE, same as both siblings: preserveAspectRatio='none' plus
-     background-size:100% 100%, so ONE sheet stretches over the section
-     however tall it gets. A pixel background-size turns it into a tile and
-     the creases stop reaching the edges, which is the whole effect. */
-  --ebs-tex-creases-faq: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='p' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.058'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='q' x1='1' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.054'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.003'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.050'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 380,0 900,900 520,900' fill='url(%23p)'/%3E%3Cpolygon points='380,0 700,0 1220,900 900,900' fill='url(%23q)'/%3E%3Cpolygon points='1440,0 1440,430 1010,0' fill='url(%23r)'/%3E%3Cpolygon points='1440,620 1440,900 1180,900' fill='url(%23p)'/%3E%3Cpolygon points='0,0 0,330 250,0' fill='url(%23q)'/%3E%3C/svg%3E");
-  /* ⚠️ CURRENTLY UNUSED — kept, not deleted, while the crease direction is
-     confirmed. The shingle tokens below were shipped on the service-area
-     section for part of 2026-08-31 and replaced by the creases above the
-     same day. Nothing consumes them right now.
-
-     They are kept because none of this is committed yet, so deleting them
-     would lose the tile outright rather than leaving it recoverable from
-     history. Once the creases are confirmed, delete all three — together
-     they are ~3 KB of data URI shipped on every page for nothing. The
-     generator that produced the tile also lives in the shingle study
-     artifact if it ever needs rebuilding. */
-  /* ── EBS-only: architectural shingle course pattern ───────────────────
-     "Grey slate" — chosen from the shingle study, 2026-08-31. Replaces a
-     first pass that was geometry only (uniform tabs, hard rules) and read
-     as ruled lines rather than as a roof.
-
-     Three things carry the shingle read, and only the first is obvious:
-
-       1. BROKEN JOINT. Alternate courses offset half a tab. Real shingles
-          break joint so no vertical seam runs down a roof; align them and
-          the eye reads tile instantly.
-       2. GRADIENT BUTT SHADOW, not a rule. The butt edge sits proud of the
-          course beneath and casts a shadow that deepens toward the edge.
-          A single hard line reads as drafting; the gradient gives it
-          thickness. This is the linearGradient in the tile.
-       3. PER-TAB SHADING. Every tab carries its own opacity, from a fixed
-          16-value table. This is the one that is easiest to skip and does
-          the most work — a uniform fill is the giveaway that a texture was
-          drawn rather than photographed.
-
-     GEOMETRY: 360 × 144 tile, four 36px courses, 90px tabs, 45px stagger.
-     Seamlessness is ARITHMETIC, not stitchTiles (a turbulence-only feature
-     that does nothing for drawn geometry): joints sit 90px apart across the
-     tile boundary in both row parities. Keep tab = width/4 and stagger =
-     tab/2 or a visible repeat seam appears.
-
-     ⚠️ FILLED IN BLACK rather than a brand colour, deliberately. An SVG
-     data URI cannot read a CSS custom property, so any colour written here
-     would be FROZEN — surviving a fork unchanged while every token around
-     it re-skins. Black plus mix-blend-multiply on the consuming layer means
-     the pattern contributes only darkness and the SURFACE supplies the hue,
-     so it re-tints for free. A butt shadow is a shadow, not a brand colour
-     (root §4.5 — raw values are right for what does not vary per client).
-
-     Opacity, blend mode and layer order live on the wrapper so the strength
-     stays tunable without anyone editing a 2.7 KB data URI. */
-  --color-ground-shingle: rgb(231, 234, 237);  /* #E7EAED — the grey the
-     courses are printed on. Darker than --color-default-background so the
-     band separates from the sections around it. */
-
-  --ebs-tex-shingles: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='144'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0.42'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='%23000'%3E%3Crect x='90' y='0' width='90' height='34' opacity='0.045'/%3E%3Crect x='180' y='0' width='90' height='34' opacity='0.016'/%3E%3Crect x='270' y='0' width='90' height='34' opacity='0.03'/%3E%3Crect x='0' y='23' width='360' height='13' fill='url(%23g)'/%3E%3Crect x='0' y='34' width='360' height='2' opacity='0.46'/%3E%3Crect x='0' y='0' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='90' y='0' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='180' y='0' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='270' y='0' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='0' y='36' width='45' height='34' opacity='0.034'/%3E%3Crect x='315' y='36' width='45' height='34' opacity='0.034'/%3E%3Crect x='135' y='36' width='90' height='34' opacity='0.052'/%3E%3Crect x='225' y='36' width='90' height='34' opacity='0.013'/%3E%3Crect x='0' y='59' width='360' height='13' fill='url(%23g)'/%3E%3Crect x='0' y='70' width='360' height='2' opacity='0.46'/%3E%3Crect x='45' y='36' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='135' y='36' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='225' y='36' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='315' y='36' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='0' y='72' width='90' height='34' opacity='0.02'/%3E%3Crect x='90' y='72' width='90' height='34' opacity='0.04'/%3E%3Crect x='270' y='72' width='90' height='34' opacity='0.055'/%3E%3Crect x='0' y='95' width='360' height='13' fill='url(%23g)'/%3E%3Crect x='0' y='106' width='360' height='2' opacity='0.46'/%3E%3Crect x='0' y='72' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='90' y='72' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='180' y='72' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='270' y='72' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='0' y='108' width='45' height='34' opacity='0.05'/%3E%3Crect x='315' y='108' width='45' height='34' opacity='0.05'/%3E%3Crect x='45' y='108' width='90' height='34' opacity='0.018'/%3E%3Crect x='135' y='108' width='90' height='34' opacity='0.033'/%3E%3Crect x='0' y='131' width='360' height='13' fill='url(%23g)'/%3E%3Crect x='0' y='142' width='360' height='2' opacity='0.46'/%3E%3Crect x='45' y='108' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='135' y='108' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='225' y='108' width='1.5' height='34' opacity='0.26'/%3E%3Crect x='315' y='108' width='1.5' height='34' opacity='0.26'/%3E%3C/g%3E%3C/svg%3E");
-
-  /* Coarser than --ebs-tex-grain, and that difference is the point: asphalt
-     shingle is GRAVEL, and the fine tooth borrowed from the concrete ground
-     was too smooth to read as granule. baseFrequency 0.62 over a 190px tile
-     against grain's 0.9 over 140px. */
-  --ebs-tex-granule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='190'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' seed='13' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='190' height='190' filter='url(%23r)'/%3E%3C/svg%3E");
-
-  /* ── Typography ── */
-  --font-body:           "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-body-bold:      "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-caption:        "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-caption-bold:   "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-heading-1:      "Barlow Semi Condensed", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-heading-2:      "Barlow Semi Condensed", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-heading-3:      "Barlow Semi Condensed", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* ── Typography (style guide §6) ──
+     Zilla Slab 700 for H1/H2 and 600 for H3/H4; Public Sans 400/500/600.
+     Loaded via the Google Fonts <link> in Layout.astro; the Zilla Slab 700
+     TTF is also vendored under og/fonts/ for the social-share card, which
+     cannot use a <link>. Desktop H1 caps at 56px (guide §6). */
+  --font-body:           "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body-bold:      "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-caption:        "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-caption-bold:   "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-heading-1:      "Zilla Slab", Georgia, "Times New Roman", serif;
+  --font-heading-2:      "Zilla Slab", Georgia, "Times New Roman", serif;
+  --font-heading-3:      "Zilla Slab", Georgia, "Times New Roman", serif;
   --font-monospace-body: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+/* =========================================
+   4. Root-level clearance tokens and keyframes
+   ========================================= */
 
 /* ── Fixed-navbar clearance ──
    How far down the page the desktop navbar reaches at rest:
@@ -434,37 +177,31 @@ body.theme-ebs {
      1. the desktop clearance spacer      (NavbarMainWrapper.tsx)
      2. hero top padding                  (HeroWrapper, Landing1-HeroWrapper)
      3. scroll-padding-top for anchors    (below)
-     4. the service-page sticky rail      (ServicePageBLDR.tsx)
+     4. the service-page sticky rail      (ServicePageBLDR.tsx, EdsTree-Contact.tsx)
    Change the bar height and every consumer follows.
 
-   ⚠️ DECLARED ON <html>, NOT ON body.theme-ebs, and that is load-bearing.
+   ⚠️ DECLARED ON <html>, NOT ON body.theme-edstree, and that is load-bearing.
    Custom properties inherit DOWNWARD only. scroll-padding-top has to sit on
-   the scroll container, which is the root element — so a variable declared on
-   <body> is invisible to it, var() resolves to nothing, the declaration is
-   invalid at computed-value time, and the property silently falls back to
-   `auto`. That failed exactly this way: every anchor still scrolled its
-   target to y=0 under the bar with no error anywhere. Declaring it here
-   instead lets it inherit down to <body> and every wrapper, so all four
-   consumers resolve from this one definition.
+   the scroll container, which is the root element — a variable declared on
+   <body> is invisible to it, var() resolves to nothing, and the property
+   silently falls back to `auto`. Declaring it here lets it inherit down to
+   <body> and every wrapper, so all four consumers resolve from one place.
 
-   Scoped via :has() so a fork of this template does not inherit an EBS
-   value (root §7.5). */
-html:has(body.theme-ebs) {
-  --ebs-nav-clearance: 120px;
+   Scoped via :has() so a fork of this template does not inherit this
+   client's value (root §7.5). */
+html:has(body.theme-edstree) {
+  --site-nav-clearance: 120px;
 
   /* Mobile equivalent. The mobile header is fixed too, but it is opaque and
      a different height: py-4 (32px) + the h-16 logo (64px) + the 1px bottom
      border = 97px. Consumed by the mobile clearance spacer in
-     NavbarMainWrapper and by scroll-padding-top below.
-
-     Verify this against the rendered header height after any change to the
-     mobile row — a stale value here shows up as content sitting slightly
-     under the header, or as a visible gap, with no error. */
-  --ebs-mobile-nav-clearance: 97px;
+     NavbarMainWrapper and by scroll-padding-top below. Verify against the
+     rendered header height after any change to the mobile row. */
+  --site-mobile-nav-clearance: 97px;
 
   /* Anchor offset for MOBILE, where the header is also fixed. The desktop
      value overrides this inside the media query below. */
-  scroll-padding-top: var(--ebs-mobile-nav-clearance);
+  scroll-padding-top: var(--site-mobile-nav-clearance);
 }
 
 /* Hero slide-indicator progress fill.
@@ -472,13 +209,10 @@ html:has(body.theme-ebs) {
    Keyframes rather than a CSS transition because the fill element is
    MOUNTED at the moment its slide becomes active — a transition needs a
    previous computed value to animate from, and on first mount there is
-   none, so it would jump straight to full. HeroWrapper remounts this
-   element on every slide change (keyed on a cycle counter), which is what
-   restarts the animation.
-
-   scaleX rather than width: it runs on the compositor, so a bar filling
-   continuously for the life of the page costs no layout or paint work. */
-@keyframes ebs-hero-progress {
+   none. HeroWrapper remounts this element on every slide change (keyed on a
+   cycle counter), which is what restarts the animation. scaleX rather than
+   width: it runs on the compositor. */
+@keyframes site-hero-progress {
   from {
     transform: scaleX(0);
   }
@@ -487,22 +221,14 @@ html:has(body.theme-ebs) {
   }
 }
 
-/* Trust-badge marquee (TrustBadgesWrapper).
+/* Trust-badge / credential-band marquee (TrustBadgesWrapper, CredentialBandWrapper).
 
-   The track renders TWO identical sets of badges side by side and slides
-   left by exactly half its own width. At -50% the frame is pixel-identical
-   to 0%, so the loop repeats with no visible seam and no JS.
-
-   translateX rather than animating `left` or a margin: transforms run on
-   the compositor, so a strip animating for the life of the page costs no
-   layout or paint work. That matters here because this section sits high
-   on the home page and never stops.
-
-   Reduced motion is handled at the call site with Tailwind's
-   `motion-reduce:animate-none` rather than a media query here — killing
-   the animation leaves the track at translateX(0), which is simply a
-   static row of badges, so nothing breaks. */
-@keyframes ebs-badge-marquee {
+   The track renders TWO identical sets side by side and slides left by
+   exactly half its own width. At -50% the frame is pixel-identical to 0%,
+   so the loop repeats with no visible seam and no JS. translateX runs on the
+   compositor. Reduced motion is handled at the call site with Tailwind's
+   `motion-reduce:animate-none`. */
+@keyframes site-badge-marquee {
   from {
     transform: translateX(0);
   }
@@ -513,199 +239,98 @@ html:has(body.theme-ebs) {
 
 /* Anchor targets must clear the fixed desktop navbar.
 
-   There are ~20 in-page anchor links across 7 targets (#home-contact,
-   #services, #landing-contact, #footer, #contact-info-form, #service-area,
-   #reviews). Once the navbar became `fixed`, every one of them scrolled its
-   target to y=0 — underneath the bar. Nothing errors; the CTA simply appears
-   to land in the wrong place, which is why this is easy to miss.
-
-   Done here rather than as scroll-mt-* on each target because the targets
-   are <section> wrappers spread across 7 page builders, and one rule cannot
-   be forgotten when a new anchor is added.
-
+   ~20 in-page anchor links across the page builders target ids that sit
+   under the fixed bar once scrolled to. Nothing errors; the CTA simply
+   appears to land in the wrong place. Done here rather than as scroll-mt-*
+   on each target so one rule cannot be forgotten when a new anchor is added.
    The scroll container is the root element, NOT <body>, so :has() is what
-   scopes this to the EBS theme without leaking to another client's fork
-   (root §7.5 requires client scoping). Only applies above the mobile
+   scopes this to this client's theme. Only applies above the mobile
    breakpoint, where the bar is fixed. */
 @media (min-width: 768px) {
-  html:has(body.theme-ebs) {
-    scroll-padding-top: var(--ebs-nav-clearance);
+  html:has(body.theme-edstree) {
+    scroll-padding-top: var(--site-nav-clearance);
   }
 }
 
 /* =========================================
-   5. Medranos prose baseline
-   Makes paragraphs consistent across ALL wrappers.
-   These rules consume the tokens defined above.
+   5. Scoped fixes for stubborn Subframe specificity
    ========================================= */
 
-/* Paragraphs anywhere */
-.theme-medranos :where(p) {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.625;
-  color: var(--color-default-font);
-}
-
-/* Gap between paragraphs (like space-y-4) */
-.theme-medranos :where(p + p) {
-  margin-top: 1rem;
-}
-
-/* Subframe "body text" classes (covers areas that are NOT <p>) */
-.theme-medranos :where(.text-body, .font-body) {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.625;
-  color: var(--color-default-font);
-}
-
-.theme-medranos :where(.text-body-bold, .font-body-bold) {
-  font-family: var(--font-body-bold);
-  font-weight: 600;
-  color: var(--color-subheading-text);
-}
-
-/* Captions */
-.theme-medranos :where(.text-caption, .font-caption) {
-  font-family: var(--font-caption);
-  font-weight: 600;
-}
-
-.theme-medranos :where(.text-caption-bold, .font-caption-bold) {
-  font-family: var(--font-caption-bold);
-  font-weight: 700;
-}
-
-/* =========================================
-   6. Scoped fixes for stubborn Subframe specificity
-   
-   
-   These rules fix specific places where Subframe's defaults
-   conflict with Medrano's design intent and can't be solved
-   in the wrapper alone.
-   ========================================= */
-
-/* Force white text on contact info left column.
-   Reason: Subframe's Infoand_ContactForm renders body text in
-   the page's --color-default-font (grey), but this section's
-   left column has a dark background where grey is unreadable. */
-.theme-medranos #contact-info-form .text-body,
-.theme-medranos #contact-info-form .font-body,
-.theme-medranos #contact-info-form .text-body span,
-.theme-medranos #contact-info-form .font-body span {
-  color: rgb(255, 255, 255) !important;
-}
-
-/* Trust-ratings stars: force secondary-tone orange instead of
-   Subframe component's internal yellow.
-   NOTE: This rule is load-bearing today but will be REMOVABLE
-   once TrustHeadlineRatingsWrapper is migrated to consume
-   --color-brand-secondary-secondary-tone directly. */
-.theme-medranos [data-section="trust-headline-ratings"] svg {
-  color: var(--color-brand-secondary-secondary-tone) !important;
-  fill: var(--color-brand-secondary-secondary-tone) !important;
-  stroke: var(--color-brand-secondary-secondary-tone) !important;
-}
-
-/* Service-area callout star: gold fill.
-   Targets the SVG inside the guarantee callout icon box (.bg-neutral-200).
-   Scoped to data-section="service-area" so it doesn't bleed elsewhere. */
-.theme-medranos [data-section="service-area"] .bg-neutral-200 svg {
-  color: rgb(234, 179, 8) !important;
-  fill: rgb(234, 179, 8) !important;
-  stroke: rgb(234, 179, 8) !important;
-}
 /* =========================================
    Home contact form — dark "quote band" treatment
-   Added 2026-09-01, to a reference Ryan supplied as LAYOUT direction.
    Section: [data-section="contact-form"] (ContactFormWrapper, home only).
+   Inherited from EBS; the colours were re-derived for the green palette.
 
    WHY THIS IS HERE AND NOT IN THE WRAPPER (root §7.5):
    Subframe's TextField and TextArea paint themselves for a LIGHT ground —
    bg-default-background on the box, neutral-border, text-default-font on the
    input, a 32px box height, and a focus-within border keyed to brand-primary.
-   Turning that dark is eight or nine genuine CONFLICT overrides (not §7.8
-   duplication) applied identically across six TextFields and one TextArea.
-   Expressed as arbitrary variants that is a 9-line [&_...]:! cluster on one
-   className, which §7.8 names as the signal to escalate — so it escalates.
+   Turning that dark is eight or nine genuine CONFLICT overrides applied
+   identically across six TextFields and one TextArea. As arbitrary variants
+   that is a 9-line [&_...]:! cluster on one className, which §7.8 names as
+   the signal to escalate — so it escalates.
 
    SELECTORS deliberately avoid Subframe's generated class names, which can
    rename on sync (§7.3). TextField and TextArea both render
    <label> > <span>(label text) + <div>(the box), so `label > div` is the box
    and `label > span` is its caption on both components.
 
-   ⚠️ CONTRAST — measured on the composited colours, not eyeballed (§11.10),
-   and the headline number is COUNTERINTUITIVE:
-     white       on #17293A ground  14.84:1
-     gold        on #17293A ground   6.86:1   ← display --color-brand-secondary
-     #17293A text on #DDE3E9 field  11.53:1
-     #52616F placeholder on field    4.92:1  ← 4.5 bar applies: the captions
-                                     below are visually hidden, so the
-                                     PLACEHOLDER is the only visible label
-     #DDE3E9 field on #17293A band  11.53:1
-     navy on the gold button        6.86:1 at the DARK end of the gradient,
-                                    8.81:1 at the #E8C36E end — safe across it
-   Gold PASSES here at 6.86 while measuring only 2.03 on the light page
-   background. That is why --color-brand-secondary-text (#8D6917) exists for
-   body copy — and why it is the WRONG token on this section: darkening gold
-   for a light ground makes it muddier against a dark one. Contrast is a
-   property of the PAIR; the ground moved, so the correct token moved with it.
-   Do not "fix" the accent here to the -text variant.
-
-   ⚠️ brand-primary blue is 3.72:1 on this ground and 3.99:1 behind white.
-   It is not usable for text or for the submit button in this section; that is
-   why the CTA is gold-on-navy rather than the site's usual blue-on-white.
+   ⚠️ CONTRAST — measured on the composited colours (§11.10). The band is
+   bg-default-font (#0B240E, near-black green); the field fill below is a
+   light green-grey:
+     white          on #0B240E band   15.3:1
+     amber          on #0B240E band    6.48:1  ← the "Free" accent word and
+                                              the focus ring PASS here; amber
+                                              fails only on LIGHT grounds
+     #0B240E text   on #DCE9DE field  13.2:1
+     #4F6653 placeholder on field      4.99:1  ← 4.5 bar applies: the captions
+                                              are visually hidden, so the
+                                              PLACEHOLDER is the visible label
+     #DCE9DE field  on #0B240E band   13.2:1
+   Style guide §4 rule 5 bans amber inside PRIMARY-green sections (2.14:1);
+   this band is the near-black text colour, not primary, and amber clears
+   6.48:1 on it. Do not move this band to brand-primary without dropping the
+   amber accents.
    ========================================= */
 
-/* The field box: light grey RESTING fill, no hard border, taller than
-   Subframe's 32px.
+/* The field box: light green-grey RESTING fill, no hard border, taller than
+   Subframe's 32px. A light fill on the dark band is what makes the inputs
+   read as fields you can type in (a dark-on-dark fill measured 1.4:1 on EBS
+   and read as faint panels).
 
-   Changed 2026-09-02 from #22384b (a dark navy one shade off the band). That
-   fill measured 1.40:1 against the #17293A ground, so the inputs read as
-   faintly lighter panels of the band rather than as fields you can type in.
-   A light fill inverts the relationship — 11.53:1 against the band — and the
-   affordance is unmistakable at a glance.
-
-   ⚠️ The fill and the text colours below are ONE decision, not two. Lightening
-   this box while leaving the input/placeholder/icon rules white would paint
-   white on #DDE3E9 (1.29:1) — invisible, and invisible with no error. If this
-   fill is ever moved back toward dark, all four rules move together. */
-body.theme-ebs [data-section="contact-form"] label > div {
-  background-color: #dde3e9 !important;
+   ⚠️ The fill and the text colours below are ONE decision, not two. */
+body.theme-edstree [data-section="contact-form"] label > div {
+  background-color: #dce9de !important;
   border-color: transparent !important;
   min-height: 3rem;
 }
 
-/* Focus: the fill brightens to white and the border goes gold, so the state
+/* Focus: the fill brightens to white and the border goes amber, so the state
    change is carried by BOTH fill and border rather than a 1px ring alone.
-   Gold is 2.17:1 against the white fill inside it but 6.86:1 against the navy
-   band outside it, which is the edge that makes the ring perceivable.
-   Subframe's own focus-within rule points at brand-primary, 3.72:1 here. */
-body.theme-ebs [data-section="contact-form"] label:focus-within > div {
+   Amber is 2.55:1 against the white fill inside it but 6.48:1 against the
+   dark band outside it, which is the edge that makes the ring perceivable.
+   Subframe's own focus-within rule points at brand-primary, 3.3:1 here. */
+body.theme-edstree [data-section="contact-form"] label:focus-within > div {
   background-color: #ffffff !important;
   border-color: var(--color-brand-secondary) !important;
 }
 
 /* Input text, placeholder and the Feather icons inside the box — dark, per
    the ⚠️ above. */
-body.theme-ebs [data-section="contact-form"] label input,
-body.theme-ebs [data-section="contact-form"] label textarea {
-  color: #17293a !important;
+body.theme-edstree [data-section="contact-form"] label input,
+body.theme-edstree [data-section="contact-form"] label textarea {
+  color: #0b240e !important;
 }
 
-body.theme-ebs [data-section="contact-form"] label input::placeholder,
-body.theme-ebs [data-section="contact-form"] label textarea::placeholder {
-  color: #52616f !important;
+body.theme-edstree [data-section="contact-form"] label input::placeholder,
+body.theme-edstree [data-section="contact-form"] label textarea::placeholder {
+  color: #4f6653 !important;
   opacity: 1; /* Firefox applies its own placeholder opacity; without this the
-                 measured 4.92:1 is not what actually paints — and 4.92 has
-                 little headroom over the 4.5 bar to give away. */
+                 measured 4.99:1 is not what actually paints. */
 }
 
-body.theme-ebs [data-section="contact-form"] label > div > span svg {
-  color: #52616f;
+body.theme-edstree [data-section="contact-form"] label > div > span svg {
+  color: #4f6653;
 }
 
 /* Field captions are visually hidden, NOT removed.
@@ -715,7 +340,7 @@ body.theme-ebs [data-section="contact-form"] label > div > span svg {
    the accessibility tree and only leaves the page.
    ⚠️ To restore visible captions, delete this ONE rule; the wrapper already
    passes a real `label` to every field. */
-body.theme-ebs [data-section="contact-form"] label > span {
+body.theme-edstree [data-section="contact-form"] label > span {
   position: absolute;
   width: 1px;
   height: 1px;

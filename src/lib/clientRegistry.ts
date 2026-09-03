@@ -21,8 +21,8 @@ export interface ClientEmailConfig {
 }
 
 const REGISTRY: Record<string, ClientEmailConfig> = {
-  ebs: {
-    businessName: "Exterior Builder Services",
+  edstree: {
+    businessName: "Ed's Tree Service",
   },
   // Next client example:
   // smith_hvac: {

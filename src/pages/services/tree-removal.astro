@@ -1,0 +1,18 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ServicePageBLDR from "../../components/websites/EdsTreeService/pages/ServicePageBLDR";
+import { servicePageData } from "../../components/websites/EdsTreeService/pages/servicePageData";
+import { CLIENT } from "../../components/websites/EdsTreeService/config/client.config";
+
+const page = servicePageData.treeRemoval;
+---
+
+<Layout
+  title={page.seoTitle}
+  description={page.seoDescription}
+  ogImage={CLIENT.seo.ogImage}
+  gtmId={CLIENT.tracking.gtmId}
+  bodyClass={CLIENT.theme.bodyClass}
+>
+  <ServicePageBLDR page={page} client:load />
+</Layout>

@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { renderSocialShareCard } from "../../components/websites/ExteriorBuilderServices/og/renderSocialShareCard";
+import { renderSocialShareCard } from "../../components/websites/EdsTreeService/og/renderSocialShareCard";
 
 /**
  * /og/default.jpg — the site-wide social share image.

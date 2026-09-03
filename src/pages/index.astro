@@ -1,7 +1,7 @@
 ﻿---
 import Layout from "../layouts/Layout.astro";
-import HomePage from "../components/websites/ExteriorBuilderServices/pages/EBS-Home";
-import { CLIENT } from "../components/websites/ExteriorBuilderServices/config/client.config";
+import HomePage from "../components/websites/EdsTreeService/pages/EdsTree-Home";
+import { CLIENT } from "../components/websites/EdsTreeService/config/client.config";
 
 // Rewritten for EBS 2026-09-01. This was the LAST route still serving the
 // previous client's metadata verbatim — "Durham-Chapel Hill NC Tree Service |
@@ -19,7 +19,7 @@ import { CLIENT } from "../components/websites/ExteriorBuilderServices/config/cl
 const seo = {
   title: `${CLIENT.vocabulary.tradeName} in ${CLIENT.seo.regionLabel} | ${CLIENT.business.name}`,
   description:
-    `Roof replacement, repair, siding and gutters for homes and businesses across ${CLIENT.geo.serviceArea}. Licensed, bonded and insured. Free estimates.`,
+    `Tree removal, trimming, stump grinding and storm clean-up for homes and businesses across ${CLIENT.geo.serviceArea}. Bonded and insured. Free estimates.`,
 };
 ---
 
