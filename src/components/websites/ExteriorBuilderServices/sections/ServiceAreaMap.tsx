@@ -1,0 +1,155 @@
+import React from "react";
+import { CLIENT } from "@/components/websites/ExteriorBuilderServices/config/client.config";
+
+/**
+ * EBS — Service-area map.
+ *
+ * Replaces a Google **My Maps** `/embed` iframe that was (a) the PREVIOUS
+ * CLIENT's map, showing the Raleigh-Durham Triangle, and (b) topped with My
+ * Maps' black title bar, which is part of that product and cannot be
+ * removed — only cropped, and its bottom "Map data (c) Google / Terms"
+ * strip has to stay for Google's terms either way.
+ *
+ * This is drawn instead: real county boundaries as inline SVG paths.
+ *
+ * WHY INLINE SVG, not an iframe or an <img>:
+ * - Zero network requests and zero preloads. React 19's SSR emits a
+ *   high-priority <link rel="preload"> for every non-lazy <img> (root
+ *   §9.13); inline SVG is invisible to that pass entirely. This section
+ *   renders on 7 routes, so an iframe or image is a per-route cost.
+ * - No third-party script, no API key, no billing, no Google chrome and no
+ *   attribution strip.
+ * - Labels use the SITE WEBFONT and the theme tokens, which <img src="*.svg">
+ *   cannot — an image would outline the text and freeze the colours, so it
+ *   would stop matching the brand on the next fork. Same reasoning as the
+ *   trust badges and the services-grid icons.
+ * - No hooks, so it does not force this section to hydrate.
+ *
+ * GEOMETRY. Boundaries are US Census TIGERweb county polygons (public
+ * domain), projected equirectangular with a cos(lat) correction — accurate
+ * at county scale and far cheaper than carrying a projection library.
+ * Simplified with Douglas-Peucker: the three service counties at a tight
+ * tolerance to keep their real jagged edges, the surrounding context
+ * counties harder, since they only need to read as neighbouring shapes.
+ *
+ * ⚠️ The viewBox aspect (1000x630, 1.59) was chosen to MATCH the container
+ * this renders in (measured 606x382 at 1440). The bounding box is the three
+ * counties padded 10%, then widened on the short axis to hit that ratio —
+ * so the counties sit centred with real neighbours around them rather than
+ * letterboxed. If the container's aspect changes, regenerate rather than
+ * stretch. `preserveAspectRatio="xMidYMid slice"` means a mismatch CROPS
+ * the outer context counties instead of letterboxing — chosen deliberately,
+ * since dead space beside a map looks broken while a slightly tighter crop
+ * does not. The three service counties sit well inside the padding, so they
+ * survive a fair amount of crop before anything important is lost.
+ *
+ * TO CHANGE THE SERVICE AREA: these paths are generated, not hand-drawn.
+ * Regenerate from the Census source rather than editing path data by hand.
+ * The counties are CLIENT.geo.serviceCounties; if that list changes, this
+ * map is stale and nothing will warn you.
+ */
+
+export interface ServiceAreaMapProps {
+  className?: string;
+}
+
+export default function ServiceAreaMap({ className }: ServiceAreaMapProps) {
+  const label = `${CLIENT.business.nameShort} service area: ${CLIENT.geo.serviceArea}`;
+
+  return (
+    <svg
+      viewBox="0 0 1000 630"
+      className={["h-full w-full", className].filter(Boolean).join(" ")}
+      role="img"
+      aria-label={label}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <title>{label}</title>
+
+      {/* Surrounding counties — context only, deliberately low contrast so
+          the served area reads as the subject rather than competing with
+          it. Neutral rather than tokenised: these do not vary per client. */}
+      <g className="fill-neutral-100 stroke-neutral-200" strokeWidth={1.5}>
+      <path d="M838.7 275.2L783.3 238.1L761.2 231.0L769.3 266.3L730.7 317.4L677.3 349.2L700.4 366.4L715.2 361.1L771.3 368.5L827.3 399.2L828.8 390.6L841.6 383.9L867.8 390.5L886.9 410.1L895.1 436.5L903.6 435.7L897.5 448.7L907.1 463.6L911.8 456.3L940.9 454.2L958.8 435.6L933.5 438.4L937.6 339.7L933.1 318.7L903.9 325.5L901.0 312.5L838.7 275.2Z" />
+      <path d="M723.6 561.0L698.3 493.8L591.9 492.4L574.4 497.2L561.3 487.8L520.3 492.9L519.8 500.6L502.1 514.7L454.4 585.7L462.7 602.5L493.9 622.2L462.4 659.4L483.2 678.6L494.6 679.6L510.3 669.3L534.0 678.2L534.5 686.0L542.2 682.7L552.6 690.2L569.4 686.9L575.6 676.8L571.6 669.6L582.1 663.7L593.3 676.2L600.7 667.3L613.1 673.1L639.4 660.5L647.0 666.8L643.7 675.7L673.9 709.1L685.8 706.4L700.3 729.0L778.8 655.2L755.5 622.5L741.1 616.6L723.6 561.0Z" />
+      <path d="M226.4 428.4L195.2 436.1L214.9 486.3L234.8 509.6L222.4 557.8L211.4 573.5L213.6 597.1L218.9 600.7L208.6 611.3L213.3 617.7L226.6 624.0L291.7 620.1L295.1 628.1L300.3 624.6L383.2 666.5L428.6 671.4L461.1 655.4L493.9 622.2L461.5 600.7L454.3 585.9L461.7 570.3L440.9 553.1L432.7 519.7L412.8 504.6L405.6 479.2L391.8 469.0L362.9 425.6L354.1 430.8L226.4 428.4Z" />
+      <path d="M299.6 624.5L295.1 628.1L290.5 619.9L226.6 624.0L208.8 612.5L193.2 627.0L171.4 633.5L167.3 657.5L150.1 664.7L151.1 678.8L143.7 678.7L139.0 698.8L125.5 705.7L298.8 884.3L299.6 873.7L309.6 869.8L302.8 851.2L323.3 842.7L328.0 830.4L337.2 825.2L342.2 782.9L359.2 771.2L392.4 786.2L415.6 761.4L412.5 753.3L461.7 747.5L499.8 676.6L483.2 678.6L461.1 655.4L428.6 671.4L383.2 666.5L299.6 624.5Z" />
+      <path d="M760.7 144.8L778.9 145.2L782.5 138.6L767.6 103.2L771.0 92.7L748.6 85.7L727.0 67.7L694.6 26.5L646.3 59.8L639.6 58.8L637.9 139.9L646.9 148.9L646.3 167.8L691.1 163.6L700.5 178.4L715.9 175.0L725.6 163.2L745.1 160.6L758.3 153.0L760.7 144.8Z" />
+      <path d="M739.1 -11.6L783.8 -49.7L803.4 -52.0L817.6 -65.8L834.0 -58.9L837.3 -102.1L812.5 -152.3L802.1 -152.5L782.8 -168.8L761.4 -168.7L755.6 -198.2L720.3 -205.9L713.2 -219.2L690.9 -226.8L637.2 -83.0L668.9 -63.2L682.5 -13.4L704.4 13.7L739.1 -11.6Z" />
+      <path d="M852.5 612.7L895.3 580.0L930.0 562.4L931.7 528.8L938.7 518.7L931.5 514.0L934.6 499.0L926.5 475.7L913.3 471.0L915.1 465.7L897.5 449.0L903.6 435.7L895.2 436.6L886.9 410.1L860.9 387.8L841.6 383.9L828.8 390.6L827.3 399.2L771.3 368.5L715.2 361.1L700.4 366.4L710.2 391.8L698.3 493.8L741.1 616.6L755.5 622.5L778.8 655.2L852.5 612.7Z" />
+      <path d="M-34.0 331.3L9.5 381.3L16.1 426.8L11.6 434.5L76.1 436.9L140.2 375.8L117.7 332.1L116.5 307.8L108.4 290.1L114.7 265.6L96.1 268.2L82.7 256.1L67.7 255.7L54.9 245.7L16.7 272.0L-34.0 331.3Z" />
+      <path d="M16.8 272.0L54.6 245.7L67.7 255.7L82.7 256.1L96.1 268.3L100.1 263.8L103.3 269.5L113.3 266.8L115.4 256.6L92.6 245.8L86.9 232.1L63.0 218.4L79.3 198.7L45.5 179.6L35.6 151.8L19.1 140.2L19.4 132.3L6.7 116.9L16.6 102.9L10.7 92.7L-161.3 96.0L-138.2 214.6L-132.5 226.7L-121.9 230.2L-115.9 256.9L-81.2 291.5L-82.4 318.0L-50.7 321.1L-34.0 331.3L16.8 272.0Z" />
+      <path d="M689.8 25.1L727.0 67.7L748.6 85.7L771.0 92.7L767.6 103.2L793.8 166.4L803.0 177.6L810.3 175.5L832.9 188.6L857.1 162.5L871.0 176.3L880.3 171.4L884.8 152.1L895.3 152.7L900.3 143.7L909.5 103.3L905.7 92.1L925.9 74.5L943.4 75.3L926.9 53.0L916.2 50.2L919.2 41.1L906.6 33.5L908.3 8.9L897.7 1.2L902.1 -9.2L908.0 -7.2L904.7 -18.7L889.6 -29.0L871.3 -31.7L873.2 -42.3L817.6 -65.8L803.4 -52.0L783.8 -49.7L765.7 -29.7L689.8 25.1Z" />
+      <path d="M573.5 58.6L646.3 59.8L704.4 13.7L682.5 -13.4L668.9 -63.2L637.2 -83.0L630.5 -68.1L618.5 -74.2L608.8 -71.2L487.5 -14.2L500.2 -5.3L514.9 49.9L539.9 58.8L542.7 52.5L573.5 58.6Z" />
+      <path d="M1249.7 478.4L1338.7 386.9L1379.9 350.6L1387.1 350.2L1387.3 326.2L1362.9 290.4L1264.8 251.9L1097.0 362.4L1121.3 384.7L1104.7 419.1L1077.9 430.6L1026.4 431.3L1026.8 435.4L996.9 441.5L997.0 449.3L943.3 448.3L940.9 454.2L909.2 458.4L913.3 471.0L926.5 475.7L934.6 499.0L931.5 514.0L938.7 518.7L931.7 528.8L930.0 562.4L998.5 541.8L1089.5 530.7L1136.9 545.3L1149.6 578.3L1171.1 588.8L1191.0 576.4L1209.2 534.2L1249.7 478.4Z" />
+      <path d="M732.0 315.6L769.3 266.3L761.2 231.0L783.2 238.1L800.1 227.5L802.8 221.3L793.4 201.4L800.7 187.3L817.3 182.5L810.3 175.5L802.9 177.5L793.8 166.4L782.9 138.6L778.9 145.2L760.7 144.8L758.3 153.0L735.7 165.2L725.4 163.3L715.6 175.1L698.3 178.3L691.1 163.6L646.3 167.8L638.9 180.3L634.8 263.8L661.6 280.0L669.7 298.6L671.1 342.0L677.3 349.2L732.0 315.6Z" />
+      <path d="M55.6 66.2L64.7 68.5L62.4 76.2L72.6 72.3L72.2 63.2L96.4 39.8L106.7 37.3L126.4 46.8L145.0 77.4L167.4 90.8L189.4 59.4L156.9 46.3L193.5 -83.4L121.1 -79.8L52.1 -87.8L57.2 -71.4L-68.5 -71.0L-74.0 94.2L10.7 92.7L26.4 86.4L21.5 79.7L31.6 74.9L37.7 74.1L35.2 81.6L44.7 85.3L55.6 66.2Z" />
+      <path d="M1110.8 352.8L1264.8 251.9L1202.8 185.1L1146.9 171.2L1135.9 186.8L1137.9 212.7L1129.5 234.9L1041.9 244.6L1021.1 225.5L993.7 253.3L990.5 271.7L983.5 277.3L988.6 286.3L1006.7 294.5L1004.5 322.2L991.7 332.8L1016.3 359.4L1050.8 376.5L1068.6 378.2L1110.8 352.8Z" />
+      <path d="M-86.2 376.0L-76.5 398.4L-103.2 427.8L-97.9 446.2L-106.4 441.1L-130.4 451.3L-123.7 451.3L-35.1 539.2L18.7 466.9L7.6 443.5L16.1 426.8L9.5 381.3L-33.9 331.3L-81.2 357.2L-78.4 363.6L-86.2 376.0Z" />
+      <path d="M810.1 -149.5L837.3 -102.1L834.0 -58.9L873.2 -42.3L871.3 -31.7L889.7 -29.0L984.1 21.8L1047.7 -14.3L1063.6 -44.2L1059.5 -51.8L1067.8 -61.4L1067.3 -73.7L1076.7 -81.1L1048.2 -92.4L1047.0 -75.4L1026.6 -55.2L1017.8 -61.2L1022.3 -81.4L1008.9 -99.1L1002.6 -100.0L976.1 -78.6L963.6 -78.1L959.6 -87.0L969.2 -94.9L966.9 -114.4L960.1 -121.3L949.2 -121.5L939.7 -112.0L935.9 -116.3L927.3 -112.6L924.4 -120.0L901.5 -115.1L895.0 -123.3L900.7 -128.4L897.5 -146.0L890.4 -146.0L893.2 -153.4L846.2 -178.2L843.4 -185.7L810.1 -149.5Z" />
+      <path d="M277.1 224.1L312.5 229.7L325.9 215.8L326.3 203.9L345.9 193.0L347.1 180.7L332.8 168.3L308.4 122.9L282.7 93.7L189.4 59.4L63.0 218.4L86.9 232.1L92.6 245.8L115.2 256.7L187.7 242.5L239.6 219.4L277.1 224.1Z" />
+      <path d="M123.4 144.6L167.4 90.8L145.0 77.4L133.2 53.4L113.6 39.5L96.2 40.0L72.1 63.3L72.6 72.3L62.4 76.2L64.6 68.3L54.9 66.4L44.7 85.3L35.2 81.6L37.7 74.1L31.6 74.9L21.5 79.7L26.4 86.4L10.2 93.8L16.6 102.8L6.7 117.0L19.4 132.3L19.1 140.2L35.6 151.8L42.4 176.1L79.3 198.7L123.4 144.6Z" />
+      <path d="M226.4 428.4L354.1 430.8L362.9 425.6L341.4 403.3L342.4 396.1L299.9 356.7L289.8 310.3L303.4 294.9L297.9 292.4L307.2 266.5L300.3 253.8L309.4 250.9L305.7 246.3L312.5 229.7L267.8 219.0L251.2 223.4L239.6 219.4L187.7 242.5L114.8 257.2L108.4 290.5L116.5 307.8L117.7 332.1L134.4 357.3L138.9 377.1L179.2 401.9L194.3 436.3L226.4 428.4Z" />
+      <path d="M280.7 86.6L373.4 -2.2L462.1 -63.0L440.1 -97.8L422.3 -104.3L421.1 -115.1L404.2 -118.0L390.8 -137.2L276.1 -188.3L257.3 -185.4L256.3 -165.6L270.2 -164.7L278.7 -155.6L261.2 -116.5L254.0 -108.7L235.2 -113.4L224.9 -82.9L193.5 -83.4L156.9 46.3L274.7 91.9L280.7 86.6Z" />
+      <path d="M833.2 188.3L815.6 180.7L800.7 187.4L793.2 202.6L802.8 223.7L783.2 238.1L901.0 312.5L903.9 325.5L933.1 318.7L937.6 339.7L933.5 438.4L958.8 435.6L946.0 448.2L997.0 449.3L996.9 441.5L1026.8 435.4L1026.4 431.3L1077.9 430.6L1104.7 419.1L1121.3 384.7L1097.0 362.4L1076.3 376.5L1052.7 377.2L1018.9 361.3L991.7 332.8L1004.5 322.2L1006.7 294.5L988.5 286.3L983.4 275.5L990.5 271.7L994.9 251.2L1021.1 225.5L995.2 201.8L900.4 142.8L895.3 152.7L884.8 152.1L876.5 174.8L868.5 175.2L867.4 167.6L857.1 162.5L833.2 188.3Z" />
+      <path d="M102.0 412.2L76.1 436.9L11.2 434.3L7.7 444.3L18.6 467.0L-35.1 539.2L125.5 705.7L139.0 698.8L143.7 678.7L151.1 678.8L150.1 664.7L167.3 657.5L171.4 633.5L193.2 627.0L211.0 605.8L218.1 604.9L211.4 573.5L222.4 557.8L235.0 510.9L214.9 486.3L202.9 447.8L173.4 396.9L138.9 377.1L102.0 412.2Z" />
+      <path d="M495.3 178.6L503.5 176.9L499.7 168.5L507.2 158.6L502.8 143.1L539.9 58.8L514.9 49.9L500.2 -5.3L480.4 -14.3L476.4 -26.6L470.7 -24.8L463.3 -36.0L461.2 -58.3L373.4 -2.2L274.7 91.9L294.6 103.6L308.4 122.9L332.8 168.3L347.1 180.7L344.9 194.1L364.0 220.8L397.1 225.2L440.3 208.6L447.3 194.8L495.3 178.6Z" />
+      <path d="M1141.3 95.5L1148.4 90.0L1187.7 91.2L1197.4 73.3L1152.2 45.8L1140.4 27.9L1142.2 16.3L1127.5 -1.5L1042.2 -1.8L1041.1 -8.9L984.1 21.8L910.8 -18.7L908.0 -7.2L898.5 -3.7L898.8 4.0L908.3 9.0L906.6 33.5L919.2 41.1L916.2 50.2L926.9 53.0L943.4 75.2L925.9 74.5L905.7 92.1L909.5 103.3L899.9 142.5L995.2 201.8L1041.9 244.6L1129.5 234.9L1137.9 212.7L1135.9 186.8L1146.9 171.2L1175.0 175.4L1149.5 127.3L1151.4 109.2L1141.3 95.5Z" />
+      </g>
+
+      {/* The three served counties. Fill and stroke are the SAME token at
+          different opacities, so a fork re-skins the map by changing
+          --color-brand-primary and nothing else. */}
+      <g className="fill-brand-primary stroke-brand-primary" fillOpacity={0.22} strokeWidth={3} strokeLinejoin="round">
+      <path d="M629.1 494.1L698.3 493.8L698.8 461.4L710.2 391.8L709.3 383.2L698.3 367.8L700.4 366.4L677.3 349.2L671.1 342.0L669.7 298.6L661.6 280.0L634.8 263.8L612.4 272.8L610.2 275.7L610.9 279.7L604.0 274.2L602.3 269.7L597.2 266.3L589.2 266.5L585.7 270.0L578.9 269.8L575.5 267.3L573.0 260.8L568.8 261.1L566.2 258.2L559.5 257.2L558.1 255.7L548.3 256.4L534.7 265.2L499.3 257.8L499.4 284.2L496.3 295.5L495.8 306.2L500.8 313.1L506.0 402.3L484.8 483.2L504.6 493.1L510.9 499.1L524.6 491.3L527.8 492.1L530.7 491.1L533.0 492.8L539.3 490.2L545.2 491.5L553.2 490.3L554.3 491.7L559.9 487.8L562.6 488.3L563.2 490.9L565.5 491.0L568.8 495.6L571.8 495.4L574.4 497.2L575.0 495.7L577.0 496.8L577.2 494.6L582.4 494.1L583.5 496.2L586.3 496.8L586.5 495.2L591.4 494.1L591.9 492.4L592.3 494.0L595.2 492.6L598.9 494.2L629.1 494.1Z" />
+      <path d="M394.3 224.8L364.0 220.8L344.9 194.1L337.9 197.5L336.1 199.2L337.0 200.0L331.8 201.3L329.4 204.4L327.0 203.3L325.6 205.6L325.9 215.8L320.1 220.0L319.5 223.3L312.6 229.4L313.3 233.5L311.5 239.1L305.9 245.7L309.4 250.9L304.3 253.7L302.0 252.2L300.3 253.6L304.8 256.7L303.1 259.8L307.2 266.5L303.5 269.1L306.2 270.8L305.7 274.2L303.1 275.3L304.7 277.4L304.9 284.2L297.9 292.4L299.2 294.0L302.5 292.3L303.5 294.4L301.8 296.4L297.4 297.2L298.2 301.1L295.2 302.9L295.6 305.7L290.5 306.6L289.8 310.4L293.6 314.0L293.2 319.4L297.3 328.3L295.1 331.7L299.1 339.8L297.8 342.9L301.0 348.2L300.4 357.5L304.6 359.4L304.2 362.8L314.9 372.9L316.4 376.6L321.7 378.5L326.3 384.3L330.7 384.7L330.8 388.6L334.2 391.0L335.3 394.7L342.4 396.1L343.5 399.5L341.4 403.3L349.8 408.0L350.6 411.6L355.5 413.2L355.3 419.1L359.7 421.4L360.9 424.1L362.8 424.2L363.4 432.2L365.0 432.3L365.8 435.6L368.0 435.4L374.8 440.0L374.5 442.8L377.7 443.9L377.4 447.4L381.4 447.1L381.5 449.9L385.0 453.6L383.5 455.1L386.5 457.8L386.0 461.1L389.6 462.8L389.4 465.7L392.1 467.5L391.8 469.0L393.5 471.0L397.8 471.3L399.5 474.3L398.8 475.2L400.4 475.4L402.4 479.0L405.6 479.2L404.9 483.0L407.0 485.0L405.2 489.2L410.4 492.4L409.2 495.5L411.7 497.7L411.2 499.2L414.9 501.9L413.5 503.0L414.5 504.0L412.7 503.4L412.8 504.6L415.6 507.7L417.6 506.4L417.6 508.5L422.7 508.0L422.3 509.7L423.7 508.9L424.8 512.3L423.6 514.1L432.6 519.4L433.4 521.5L431.8 522.2L432.1 526.4L433.7 527.4L432.9 529.4L434.5 529.3L438.3 533.7L436.1 536.5L437.3 537.8L433.8 540.0L437.7 541.5L437.7 547.4L441.2 549.0L441.7 554.2L446.7 554.2L446.1 555.9L447.6 555.5L448.4 558.0L451.4 559.0L453.3 563.8L457.0 562.7L459.3 567.5L458.6 568.9L461.6 570.2L462.9 573.5L459.3 576.5L461.8 577.8L502.1 514.7L519.8 500.6L519.6 493.2L515.2 497.5L510.9 499.1L504.6 493.1L484.8 483.2L506.0 402.3L500.8 313.1L495.8 306.2L496.3 295.5L499.4 284.2L499.9 250.5L465.2 239.6L440.3 208.6L402.8 221.0L397.1 225.2L394.3 224.8Z" />
+      <path d="M638.5 113.0L638.9 58.2L567.2 58.7L542.7 52.5L502.8 143.1L503.3 156.1L507.2 158.6L499.7 168.5L501.7 172.1L500.7 173.9L503.3 174.0L503.5 176.9L498.4 179.0L494.9 178.6L492.4 180.4L485.8 180.4L485.3 182.2L477.8 181.5L477.8 185.5L466.7 192.4L460.3 189.4L455.8 190.9L452.9 194.7L447.3 194.8L440.3 208.6L465.2 239.6L499.9 250.5L499.3 257.8L534.7 265.2L548.3 256.4L558.1 255.7L559.5 257.2L566.2 258.2L568.8 261.1L573.0 260.8L575.5 267.3L578.9 269.8L585.7 270.0L589.2 266.5L597.2 266.3L602.3 269.7L604.0 274.2L611.0 279.6L610.2 275.7L612.4 272.8L634.8 263.8L638.9 180.3L641.5 173.5L647.7 165.7L649.0 161.0L646.7 148.4L637.9 139.9L638.5 113.0Z" />
+      </g>
+
+      {/* Towns. Faison is the HQ and is marked in brand gold at a larger
+          radius; the rest are the previewCities. Label offsets are
+          hand-placed against the measured projected coordinates because
+          Warsaw and Kenansville sit close enough to collide. */}
+      <g>
+        <circle cx={569.5} cy={159.6} r={5}
+          className="fill-default-font"
+          stroke="white" strokeWidth={2} />
+        <text x={579.5} y={163.6} textAnchor="start"
+          className="fill-default-font font-body"
+          fontSize={18} fontWeight={500}>
+          Goldsboro
+        </text>
+      </g>
+      <g>
+        <circle cx={539.2} cy={254.4} r={5}
+          className="fill-default-font"
+          stroke="white" strokeWidth={2} />
+        <text x={549.2} y={258.4} textAnchor="start"
+          className="fill-default-font font-body"
+          fontSize={18} fontWeight={500}>
+          Mount Olive
+        </text>
+      </g>
+      <g>
+        <circle cx={509.7} cy={295.1} r={7}
+          className="fill-brand-secondary"
+          stroke="white" strokeWidth={2.5} />
+        <text x={521.7} y={300.1} textAnchor="start"
+          className="fill-default-font font-body"
+          fontSize={20} fontWeight={700}>
+          Faison
+        </text>
+      </g>
+      <g>
+        <circle cx={433.5} cy={354.0} r={5}
+          className="fill-default-font"
+          stroke="white" strokeWidth={2} />
+        <text x={423.5} y={358.0} textAnchor="end"
+          className="fill-default-font font-body"
+          fontSize={18} fontWeight={500}>
+          Clinton
+        </text>
+      </g>
+    </svg>
+  );
+}

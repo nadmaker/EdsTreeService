@@ -1,0 +1,81 @@
+Category,Question,Maps to,Answer
+Business Identity,Legal entity name,business.nameLegal,Exterior Builder Services Inc.
+Business Identity,Marketing name,business.name,Exterior Builder Services
+Business Identity,Short name,business.nameShort,EBS
+Business Identity,Possessive form,business.nameShortPossessive,EBS's
+Business Identity,Owner full name,business.owner,Eduardo Jimenez
+Business Identity,Year founded,business.yearFounded,2006
+Business Identity,Production URL,business.siteUrl,https://exteriorbuilderservices.com/
+Contact,Main phone (E.164),contact.phoneTel,+19102169714
+Contact,Main phone (display),contact.phoneDisplay,(910) 216-9714
+Contact,SMS number (if different from main),contact.phoneSMS,none — same as main
+Contact,Emergency / after-hours display,contact.emergencyPhoneDisplay,none
+Contact,Email address,contact.email (contact.emailHref derived),exteriorbuilder121414@gmail.com
+Contact,Street address,contact.address,"104 Johny B Tann Ln, Faison, NC 28341"
+Contact,Maps search/share URL,contact.mapsUrl,https://maps.app.goo.gl/Ti8Mnc39VKA81MsZ9
+Contact,My Maps embed URL,map.embedUrl,none yet
+Licensing & Credentials,License type + number,client.config.ts certifications block (free-form per Step 2),Licensed NC contractor — bonded and insured. License number still TBD
+Licensing & Credentials,Insurance carrier/status,Content validation only — no dedicated config field,"Licensed, bonded and insured — confirmed by owner"
+Licensing & Credentials,Certifications,client.config.ts certifications block,CertainTeed ShingleMaster Premier (VERIFY) | OSHA Compliant (accurate but weak — see notes)
+Vocabulary,Trade name,vocabulary.tradeName,Roofing & Siding
+Vocabulary,Credential title (singular),vocabulary.credentialTitle,OSHA-Trained Roofer
+Vocabulary,Credential title (plural),vocabulary.credentialTitlePlural,OSHA-Trained Roofers
+Vocabulary,Industry association name,vocabulary.industryAssociation,none — not a member of any trade association
+Vocabulary,Branded guarantee name,vocabulary.guaranteeName,EBS Service Guarantee
+Vocabulary,Primary service tracking slug,service.trackingSlug,exterior-contractor
+Vocabulary,Primary service display noun,servicePageData.tsx (primary entry) — content,Roofing & Siding
+Vocabulary,Primary/signature service action,Hero/page-builder content,Same-Day Roofing
+Vocabulary,Two secondary services,servicePageData.tsx entries — content,"Siding Installation, Gutter Installation"
+Vocabulary,Seasonal concern,Content copy (hero/FAQ) — no dedicated config field,hurricane and storm damage
+Vocabulary,Equipment term,Content copy — no dedicated config field,architectural shingles
+Vocabulary,Licensed descriptor,Content copy — no dedicated config field,"Licensed, Bonded & Insured NC Roofing & Siding Contractor"
+Geography,HQ city,geo.hqCity,Faison
+Geography,HQ state,geo.hqState,NC
+Geography,Tracking city slug,geo.trackingCity,faison-nc
+Geography,Service area display label,geo.serviceArea,"Duplin, Sampson & Wayne Counties"
+Geography,Counties served,geo.serviceCounties,"Duplin, Sampson, Wayne"
+Geography,3 preview cities,geo.previewCities,"Clinton, Goldsboro, Mount Olive"
+Theme,Theme slug,theme.slug,ebs
+Theme,siteKey,siteKey,ebs
+Theme,Primary color,global.css body.theme-{slug} block,"rgb(22, 133, 204) / #1685CC"
+Theme,Primary-hover color,global.css body.theme-{slug} block,"rgb(19, 118, 180) / #1376B4"
+Theme,Secondary color,global.css body.theme-{slug} block,"rgb(221, 168, 44) / #DDA82C"
+Theme,Background color,global.css body.theme-{slug} block,"rgb(245, 248, 251) / #F5F8FB"
+Theme,Body text color,global.css body.theme-{slug} block,"rgb(23, 41, 58) / #17293A"
+Theme,Font,global.css body.theme-{slug} block,Barlow Semi Condensed (display) / Inter (body)
+SEO,Region label,seo.regionLabel,"Goldsboro–Clinton, NC"
+Tracking,Launching with tracking?,Determines whether Step 8 runs,No
+Tracking,GTM container ID,Env var PUBLIC_GTM_ID_{SLUG} + tracking.gtmId,N/A — not launching with tracking
+Tracking,GA4 property / Measurement ID,tracking/gtm-container-template.json import (Step 8),N/A — not launching with tracking
+Tracking,Google Ads account status,Step 8 conversion action setup,N/A — not launching with tracking
+Reviews,Google — rating/count/profile URL,reviews.platforms[],"3 reviews — present as NAMED TESTIMONIALS, no aggregate score. https://maps.app.goo.gl/Ti8Mnc39VKA81MsZ9"
+Reviews,Facebook — rating/count/profile URL,reviews.platforms[],none
+Reviews,BBB — rating/status/profile URL,reviews.platforms[],none
+Reviews,Angi — rating/count/profile URL,reviews.platforms[],none
+Reviews,Other platforms — rating/count/profile URL,reviews.platforms[],"Yelp — profile exists, NO ratings — https://www.yelp.com/biz/exterior-builder-services-faison"
+Services,Service list,servicePageData.tsx entries,"Roof Replacement, Roof Repair, Roof Installation, Metal Roof Installation, Local Roof Repair Contractors, Siding Service, Siding Installation, Siding Contractor, Gutter Installation, Gutter Cleaning"
+Services,One-line description per service,servicePageData.tsx captionDescription (seed),"Roof Replacement — Full tear-off and rebuild when a roof is past repairing, including deck inspection, new underlayment, and haul-away of the old material. || Roof Repair — Targeted fixes for leaks, wind damage, missing shingles, and failed flashing, most of them handled the same day we come out. || Roof Installation — New roofs on new construction and additions, installed as a complete system rather than shingles on their own. || Metal Roof Installation — Standing seam and metal panel roofing built for eastern North Carolina weather, with a service life well past asphalt. || Local Roof Repair Contractors — Crews based in Faison working our own counties, not a call center sending subcontractors in from three counties away. || Siding Service — Repair, replacement, and upkeep of existing siding, from storm damage to panels that have simply worn out. || Siding Installation — New siding on homes and commercial buildings, including tear-off, moisture barrier, and trim work. || Siding Contractor — Licensed, bonded, and insured siding work carried start to finish by our own crews. || Gutter Installation — New gutters and downspouts sized and pitched to carry water away from the foundation. || Gutter Cleaning — Clearing debris and checking pitch and seams so water cannot back up under the roof edge."
+City Landing Pages,Cities list,cityLandingData.tsx entries,"Goldsboro, Clinton, Mount Olive, Warsaw, Faison, Kenansville"
+Offers,At least one offer (or explicit opt-out),offers.items[],"Free estimates (no charge, no obligation)"
+Offers,Offer — title,offers.items[].title,Free Roof Inspection & Estimate
+Offers,Offer — badge,offers.items[].badge,FREE
+Offers,Offer — description,offers.items[].description,"No charge to come out and no obligation. We inspect the roof, walk you through what we find, and give you a written estimate."
+Offers,Offer — minimum label,offers.items[].minimumLabel,
+Offers,Offer — expiration date,offers.items[].validThrough,12/31/2026
+Content,Founding story / about raw material,{Client}-About.tsx / InfoImageColumnWrapper.tsx prose,"Exterior Builder Services Inc. is led by owner Eduardo Jimenez, who has been putting roofs on homes and businesses across eastern North Carolina since 2006. Based in Faison and serving Duplin, Sampson, and Wayne counties, the company handles roofing and siding — the work that keeps weather out of a building and decides how it looks from the road. Eduardo's approach is straightforward: licensed, bonded, and insured, OSHA-trained crews, and a written estimate before anything starts. Every roof carries the company name on it long after the trucks pull out, and it gets built that way."
+Content,5-8 FAQ topics or questions,FullStretchFaqWrapper.tsx defaultFaqItems,"1. What areas do you serve? — Faison and the surrounding Duplin, Sampson, and Wayne County area, including Goldsboro, Clinton, Mount Olive, Warsaw, and Kenansville. || 2. What do you specialize in? — Roofing and siding, for both homes and commercial buildings. || 3. How long have you been in business? — Owner Eduardo Jimenez has been roofing in eastern North Carolina since 2006. || 4. Do you offer free estimates? — Yes. No charge to come out, and no obligation. || 5. Are you licensed and insured? — Yes. Licensed, bonded, and insured, with OSHA-trained crews. || 6. Do you handle both small repairs and full roof replacements? — Both. Leaks and storm damage through to complete tear-offs and rebuilds. || 7. Do you install metal roofs? — Yes, standing seam and metal panel, alongside asphalt shingle. || 8. What kind of warranty do you offer? — A lifetime warranty is available on full roof replacements we install, on top of the manufacturer's material warranty. If our work fails, we come back at no charge. || 9. How do I get a quote? — Call (910) 216-9714, email exteriorbuilder121414@gmail.com, or leave a message on the website."
+Content,Social profile URLs,FooterSection.tsx social hrefs — content,"none — Google and Yelp are review profiles, not social"
+Content,Guarantee/warranty terms,vocabulary.guaranteeName + ServiceGuaranteeAndFeaturesWrapper.tsx prose,"Lifetime warranty available on full roof replacements EBS installs, on top of the manufacturer's material warranty (30 years to lifetime depending on shingle). If the work fails, EBS returns at no charge."
+Content,Hero headline preferences,HeroWrapper.tsx / page builder headline content,"Roofing & Siding Done Right Since 2006,  Licensed, Bonded & Insured. Free Estimates, No Obligation,  Local Crews, Lifetime Warranty, Written Estimate First, Faison-Based Roofers Serving Goldsboro, Clinton & Mount Olive"
+Emails,Destination address for submissions,Env var {SLUG}_CONTACT_TO_EMAIL,exteriorbuilder121414@gmail.com
+Emails,Sender domain choice,Env var {SLUG}_CONTACT_FROM_EMAIL,exteriorbuilderservices.com — pending DNS access
+Emails,BCC address,Env var {SLUG}_CONTACT_BCC_EMAIL,
+Assets,Logo files,public/images/ (see NavbarMainWrapper.tsx / FooterSection.tsx paths),NONE — no logo file exists
+Assets,Hero image/video,"public/videos/, public/images/ — if no video, note HeroWrapper image fallback (Step 5)",
+Assets,Before/after photos (if applicable),public/images/,
+Assets,Coupon files matching offers,public/coupons/,
+Assets,TBD asset policy,Generated CLAUDE.md §8 Open Items,Every TBD asset gets a named placeholder + an Open Item in the generated CLAUDE.md
+Business Model,Customer segment (residential / commercial / both),Content + form routing — no dedicated config field,Both residential and commercial
+Business Model,Residential vs commercial revenue priority,Hero framing + service ordering,Residential
+Business Model,Add property-type field to forms?,/api/contact payload contract (§10.4) + all 4 form wrappers + email template,No
+Theme,Tertiary color (client-specific slot),"global.css body.theme-ebs, consumed via text-[var(--color-brand-tertiary)]","rgb(88, 116, 138) / #58748A"

@@ -1,0 +1,22 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "src/**/*"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    // Must match the TypeScript major this repo builds with (currently 5.9.x,
+    // which accepts "5.0" only). "6.0" is rejected with TS5103, and because
+    // tsc exits on a config error BEFORE type-checking any file, that one
+    // wrong string silently disables ALL type-checking — it is how a
+    // reference to a non-existent config key reached production on the
+    // upstream template. On any TypeScript upgrade, re-check this value and
+    // confirm tsc still reports on the tree (root CLAUDE.md §11.7).
+    "ignoreDeprecations": "5.0",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/ui/*": ["src/ui/*"]
+    }
+  }
+}

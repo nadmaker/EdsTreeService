@@ -1,0 +1,30 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import PrivacyPage from "../components/websites/ExteriorBuilderServices/pages/EBS-Privacy";
+import { CLIENT } from "../components/websites/ExteriorBuilderServices/config/client.config";
+
+// Rewritten for EBS 2026-09-02. The description was untouched previous-client
+// copy — "Serving Durham, Chapel Hill, and the Triangle". Banned and stale copy
+// in a <meta> tag is invisible on screen, which is how it outlived the index
+// and contact rewrites (root §13.10.7). With /offers now deleted, this was the
+// last route carrying previous-client metadata.
+//
+// Geography tokenised to CLIENT.geo.serviceArea so it tracks the config rather
+// than needing a second manual fix. No claims beyond the year founded, which is
+// cleared. Description is 156 chars, inside the ~160 cut.
+const seo = {
+  title: `Privacy Policy | ${CLIENT.business.nameLegal}`,
+  description:
+    `Learn how ${CLIENT.business.nameLegal} collects, uses, and protects your personal information. Serving ${CLIENT.geo.serviceArea}, NC since ${CLIENT.business.yearFounded}.`,
+};
+---
+
+<Layout
+  title={seo.title}
+  description={seo.description}
+  ogImage={CLIENT.seo.ogImage}
+  gtmId={CLIENT.tracking.gtmId}
+  bodyClass={CLIENT.theme.bodyClass}
+>
+  <PrivacyPage client:load />
+</Layout>

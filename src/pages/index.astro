@@ -1,0 +1,34 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import HomePage from "../components/websites/ExteriorBuilderServices/pages/EBS-Home";
+import { CLIENT } from "../components/websites/ExteriorBuilderServices/config/client.config";
+
+// Rewritten for EBS 2026-09-01. This was the LAST route still serving the
+// previous client's metadata verbatim — "Durham-Chapel Hill NC Tree Service |
+// Medrano's INC Certified Arborist", with a description promising "emergency
+// service", which is MUST-NOT-SHIP on the CLAIMS REGISTER. Banned copy in a
+// <meta> tag is invisible on screen, which is how it survived (root §13.10.7).
+//
+// Tokenised rather than hardcoded, matching about.astro. Claims used are all
+// cleared: licensed/bonded/insured, free estimates, residential AND commercial.
+// No star rating, review count, BBB, trade association, or 24-7 framing.
+//
+// Title is 69 chars: longer than Google's ~60-char display cut, but the shape
+// is deliberate — the service and the region both land inside the first 60,
+// so only the brand tail truncates. Description is 156, inside the ~160 limit.
+const seo = {
+  title: `${CLIENT.vocabulary.tradeName} in ${CLIENT.seo.regionLabel} | ${CLIENT.business.name}`,
+  description:
+    `Roof replacement, repair, siding and gutters for homes and businesses across ${CLIENT.geo.serviceArea}. Licensed, bonded and insured. Free estimates.`,
+};
+---
+
+<Layout
+  title={seo.title}
+  description={seo.description}
+  ogImage={CLIENT.seo.ogImage}
+  gtmId={CLIENT.tracking.gtmId}
+  bodyClass={CLIENT.theme.bodyClass}
+>
+  <HomePage client:load />
+</Layout>

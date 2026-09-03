@@ -1,0 +1,553 @@
+"use client";
+
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { CLIENT } from "@/components/websites/ExteriorBuilderServices/config/client.config";
+
+/**
+ * EBS — Portfolio gallery.
+ *
+ * Third revision. Carousel → mosaic grid (2026-08-27) → CSS masonry
+ * (2026-08-28) → CENTER-FOCUS CAROUSEL (2026-08-28, this one), to a
+ * reference Ryan supplied. Consumed by EBS-Home and EBS-Contact.
+ *
+ * WHY THIS SHAPE. Masonry gave every photo its exact native aspect and
+ * therefore varied tile heights — a ragged, scrapbook edge that read as
+ * unserious. The brief is the opposite: every photo trimmed to the SAME
+ * rectangle by its viewport, with the frames doing the composing rather
+ * than the photographs. So each slide is a fixed 16:10 window and the
+ * image is object-cover inside it.
+ *
+ * The cost, stated plainly: two of the seven files are PORTRAIT (0.75).
+ * Covering a 0.75 source into a 1.6 window keeps the full width and
+ * discards about 53% of the height, centred. On ebs-gallery-1 that is a
+ * roofer at work, so check that the crop has not cut the subject in half
+ * before shipping — object-position is the lever if it has. This is the
+ * trade the uniform-rectangle brief buys; masonry was the version that
+ * cropped nothing.
+ *
+ * HYDRATION RETURNS, deliberately. The previous two revisions ran on zero
+ * client JS. Arrows, dots and active-slide emphasis cannot, so this file
+ * is "use client" again. Kept as cheap as possible: the track is native
+ * CSS scroll-snap, so touch swipe costs nothing and the JS only reads
+ * scroll position and writes an index.
+ *
+ * view_section stays on Mechanism A (`data-track-view`). Root §8.2's
+ * "Mechanism B when it hydrates anyway" note guards against DOUBLE-firing
+ * during a migration; there is no React observer here to double with, and
+ * the vanilla one fires earlier off server-rendered DOM. Do not add a
+ * useEffect observer alongside it.
+ *
+ * Photographs are genuinely EBS's as of 2026-08-28 — see GALLERY_IMAGES.
+ */
+
+interface GalleryImage {
+  src: string;
+  alt: string;
+  /**
+   * Intrinsic pixel dimensions. Still required even though every slide is
+   * a fixed-aspect window: they let the browser size the lazy image
+   * before its bytes arrive, and they document which files are portrait
+   * (and so crop hardest) without opening them.
+   */
+  w: number;
+  h: number;
+}
+
+/**
+ * The seven photographs selected by the owner, 2026-08-28, replacing the
+ * previous client's tree-service photography. A pixel sample reads
+ * 0.0-1.7% foliage across the set, against 60.6% for the file
+ * ebs-gallery-6 used to be.
+ *
+ * ⚠️ THREE ALSO RENDER IN THE HERO on the home page: ebs-hero-poster
+ * (slide 1, the LCP element), ebs-hero-2-roof-replacement and
+ * ebs-hero-3-commercial-siding are HeroWrapper's background carousel, so
+ * a visitor to `/` meets them twice. Explicitly requested, not an
+ * oversight — deleting the last three entries leaves a four-photo gallery
+ * of images that appear nowhere else. No extra download either way: the
+ * hero has already fetched them and these tiles are lazy.
+ *
+ * PORTRAIT sources (w < h) crop hardest in the 16:10 window — noted per
+ * entry so the next person does not have to work it out.
+ */
+const GALLERY_IMAGES: readonly GalleryImage[] = [
+  {
+    src: "/images/ebs-gallery-1-roof-replacement.jpg",
+    alt: "Roofer fastening shingles on a residential roof",
+    w: 765,
+    h: 1020, // PORTRAIT — heaviest crop
+  },
+  {
+    src: "/images/ebs-gallery-2-roof-repair.jpg",
+    alt: "Roof structure going up on a new build",
+    w: 1360,
+    h: 1020,
+  },
+  {
+    src: "/images/ebs-gallery-3-metal-roof.jpg",
+    alt: "Underlayment laid across a low-slope roof deck",
+    w: 765,
+    h: 1020, // PORTRAIT — heaviest crop
+  },
+  {
+    src: "/images/ebs-gallery-6-exterior-project.jpg",
+    alt: "Completed roof on a two-storey home",
+    w: 1360,
+    h: 1020,
+  },
+  {
+    src: "/images/ebs-hero-2-roof-replacement.jpg",
+    alt: "Roof replacement underway on a residential property",
+    w: 1247,
+    h: 802,
+  },
+  {
+    src: "/images/ebs-hero-3-commercial-siding.jpg",
+    alt: "Siding work on a commercial building",
+    w: 1000,
+    h: 562,
+  },
+  {
+    src: "/images/ebs-hero-poster.jpg",
+    alt: "Finished exterior on a commercial building",
+    w: 1058,
+    h: 794,
+  },
+];
+
+function ChevronLeft({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
+function ChevronRight({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+export interface PortfolioGalleryWrapperProps {
+  id?: string;
+  className?: string;
+
+  /** Content */
+  titleLeadIn?: string;
+  titleEmphasis?: string;
+  subtitle?: React.ReactNode;
+  images?: readonly GalleryImage[];
+
+  /**
+   * Slide centred on load, zero-based. Defaults to 1 — the SECOND photo —
+   * by request: the first source is portrait and crops hardest in the
+   * 16:10 window, so opening on it is the weakest first impression the
+   * set can give. Clamped to the array, so it degrades to slide 0 rather
+   * than throwing if `images` is ever shortened past it.
+   */
+  initialSlide?: number;
+
+  /** CTA */
+  ctaHref?: string;
+  ctaLabel?: React.ReactNode;
+
+  /** Tracking context */
+  trackingSection?: string;
+  trackingCity?: string;
+  trackingService?: string;
+  trackingPageType?: string;
+}
+
+export default function PortfolioGalleryWrapper({
+  id,
+  className,
+  titleLeadIn = "See our roofing work across",
+  titleEmphasis = CLIENT.geo.serviceArea,
+  subtitle,
+  images = GALLERY_IMAGES,
+  initialSlide = 1,
+  /*
+    ⚠️ These two defaults are REACHABLE and correct — do not "fix" them to
+    home-page values. EBS-Contact renders this wrapper with no ctaHref, so
+    the default is what /contact uses, and #contact-info-form is that
+    page's form anchor. EBS-Home passes ctaHref="#home-contact" explicitly.
+    trackingPageType matches the same /contact default. Root §13.3.8.
+  */
+  ctaHref = "#contact-info-form",
+  ctaLabel = "Get a Free Quote",
+  trackingSection = "portfolio-gallery",
+  // Defaulted so a future call site that forgets the page-level TRACKING
+  // spread still lands in city-keyed joins (client §3.7 defect 3).
+  trackingCity = CLIENT.geo.trackingCity,
+  trackingService = CLIENT.service.trackingSlug,
+  trackingPageType = "contact",
+}: PortfolioGalleryWrapperProps) {
+  /*
+    Shared context, spread rather than retyped per element — a partial set
+    still fires through the click bridge but cannot be joined in
+    analytics. Root §8.6, §13.3.5.
+  */
+  const tracking = {
+    "data-section": trackingSection,
+    "data-city": trackingCity,
+    "data-service": trackingService,
+    "data-page-type": trackingPageType,
+  } as const;
+
+  const trackRef = useRef<HTMLDivElement | null>(null);
+
+  /*
+    Clamped once, then used for BOTH the initial dot state and the initial
+    scroll position. Those two must agree or the ring lands on one slide
+    while the track shows another.
+  */
+  const startIndex = Math.max(0, Math.min(images.length - 1, initialSlide));
+  const [active, setActive] = useState(startIndex);
+
+  /**
+   * Distance from one slide's start to the next, MEASURED rather than
+   * computed from the vw-based width. The slide width is a viewport
+   * percentage set in CSS and the gap comes from a Tailwind class, so
+   * re-deriving either in JS would duplicate the source of truth and
+   * drift the moment a breakpoint changes. Reading two child rects cannot.
+   */
+  const stepPx = useCallback(() => {
+    const track = trackRef.current;
+    const first = track?.children[0] as HTMLElement | undefined;
+    const second = track?.children[1] as HTMLElement | undefined;
+    if (!first) return 0;
+    if (second) return second.offsetLeft - first.offsetLeft;
+    return first.getBoundingClientRect().width;
+  }, []);
+
+  /* Keep the active dot in step with wherever the track actually is —
+     including after a touch swipe, which no button handler sees. */
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const step = stepPx();
+        if (!step) return;
+        const i = Math.round(track.scrollLeft / step);
+        setActive(Math.max(0, Math.min(images.length - 1, i)));
+      });
+    };
+
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [images.length, stepPx]);
+
+  /*
+    Open on `startIndex` rather than slide 0. The track is a scroll
+    container, so the opening slide is a SCROLL POSITION, not something a
+    render can express — the only way to set it is to move the track once
+    layout exists.
+
+    `behavior: "instant"` is load-bearing twice over: the carousel must not
+    appear to animate by itself on arrival, and "instant" explicitly
+    overrides a CSS `scroll-behavior: smooth`, which a plain `scrollLeft`
+    assignment would still obey.
+
+    stepPx() measures two child rects, so it returns 0 until the track has
+    been laid out — on a cold load that can be the first frame. Hence the
+    bounded rAF retry: without it the gallery silently opens on slide 0
+    whenever layout lags, which is the kind of intermittent failure that
+    reads as "it works sometimes".
+
+    Runs exactly once, guarded by a ref. Without the guard a later re-render
+    could re-run this and yank the track back while the visitor is mid-swipe.
+  */
+  const hasInitialised = useRef(false);
+
+  useEffect(() => {
+    if (hasInitialised.current) return;
+    const track = trackRef.current;
+    if (!track) return;
+
+    if (startIndex === 0) {
+      hasInitialised.current = true; // already there; nothing to move
+      return;
+    }
+
+    let frame = 0;
+    let attempts = 0;
+
+    const place = () => {
+      const step = stepPx();
+      if (!step) {
+        if (attempts++ < 10) frame = requestAnimationFrame(place);
+        return;
+      }
+      hasInitialised.current = true;
+      track.scrollTo({ left: startIndex * step, behavior: "instant" });
+    };
+
+    place();
+    return () => cancelAnimationFrame(frame);
+  }, [startIndex, stepPx]);
+
+  const goTo = useCallback(
+    (i: number) => {
+      const track = trackRef.current;
+      if (!track) return;
+      const clamped = Math.max(0, Math.min(images.length - 1, i));
+      /*
+        Plain scrollTo is enough. `scroll-snap-type: x mandatory` is
+        sometimes reported to catch a programmatic smooth scroll on an
+        intermediate snap point, which would make multi-step jumps land
+        short — it does NOT happen here, verified by driving the track to
+        its 2039px maximum four ways (instant, smooth with snap on,
+        smooth with snap suspended, and scrollIntoView). All four landed
+        exactly. Do not add a snap-suspension workaround for it.
+      */
+      track.scrollTo({ left: clamped * stepPx(), behavior: "smooth" });
+    },
+    [images.length, stepPx]
+  );
+
+  const arrowClass = [
+    "flex h-12 w-12 items-center justify-center rounded-full",
+    "border border-neutral-200 bg-white text-default-font shadow-md",
+    "transition-colors duration-200",
+    "hover:border-brand-primary hover:text-brand-primary",
+    "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:text-default-font",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
+  ].join(" ");
+
+  return (
+    <section
+      id={id}
+      className={["w-full bg-default-background py-20 md:py-28", className]
+        .filter(Boolean)
+        .join(" ")}
+      data-track-view
+      data-section={trackingSection}
+      data-city={trackingCity}
+      data-service={trackingService}
+      data-page-type={trackingPageType}
+    >
+      {/* Header — CENTRED here, unlike the left-aligned York stack used by
+          the hero, services grid and stats band. That is a deliberate
+          departure to match the reference: this section is a showcase
+          rather than an argument, and centring lets the carousel below
+          sit symmetrically under it. */}
+      <div className="mx-auto w-full max-w-[1280px] px-6 text-center md:px-10">
+        <h2 className="mx-auto max-w-[22ch] font-heading-1 text-3xl font-bold uppercase leading-[1.12] md:text-5xl">
+          {/* Two-tone, mirroring the reference's italic/solid split.
+              brand-primary measures 3.74:1 on this surface — under AA for
+              body text, but this is 30px+ bold, which is WCAG "large" and
+              needs only 3:1. Do NOT reuse this pairing at body size. */}
+          <span className="italic text-brand-primary">{titleLeadIn} </span>
+          <span className="text-default-font">{titleEmphasis}</span>
+        </h2>
+
+        <p className="mx-auto mt-6 max-w-[68ch] text-base leading-relaxed text-neutral-600 md:text-lg">
+          {subtitle ?? (
+            <>
+              We would rather show you than tell you. These are recent{" "}
+              {CLIENT.vocabulary.tradeName.toLowerCase()} jobs around{" "}
+              {CLIENT.geo.serviceArea} —{" "}
+              <strong className="font-semibold text-default-font">
+                residential and commercial
+              </strong>
+              , from full replacements to repairs. Every one finished with a{" "}
+              <strong className="font-semibold text-default-font">
+                clean site
+              </strong>
+              .
+            </>
+          )}
+        </p>
+      </div>
+
+      {/*
+        TRACK. Sits OUTSIDE the max-w-[1280px] wrapper on purpose — that is
+        what lets the neighbouring slides run off the edges of the screen
+        the way the reference does. It is a plain block at 100% of the
+        section, so it spans the viewport WITHOUT the horizontal-overflow
+        risk that `w-screen` carries (w-screen ignores the scrollbar and
+        would add ~15px of overflow on desktop).
+
+        Centring the first and last slide is done with symmetric padding
+        of (track − slide) / 2 rather than spacer elements, so there are no
+        phantom children for stepPx() to trip over.
+
+        `--slide` is declared once as an arbitrary property and consumed by
+        both the padding and the slide width, so the two cannot disagree.
+      */}
+      <div
+        ref={trackRef}
+        className={[
+          "mt-14 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth",
+          "[--slide:82vw] md:[--slide:58vw] lg:[--slide:46vw]",
+          "px-[calc((100%-var(--slide))/2)]",
+          // Native swipe stays; the scrollbar itself would be noise here.
+          "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          // Room for the active slide's shadow, which would otherwise clip.
+          "py-6",
+        ].join(" ")}
+        role="group"
+        aria-roledescription="carousel"
+        aria-label="Recent work"
+      >
+        {images.map((image, i) => {
+          const isActive = i === active;
+          return (
+            <figure
+              key={image.src}
+              className={[
+                "w-[var(--slide)] shrink-0 snap-center",
+                "transition-all duration-500 ease-out",
+                // Centre slide is raised and framed; neighbours sit back.
+                isActive
+                  ? "scale-100 opacity-100"
+                  : "scale-[0.93] opacity-60 md:opacity-70",
+              ].join(" ")}
+              aria-hidden={isActive ? undefined : "true"}
+            >
+              <div
+                className={[
+                  "overflow-hidden rounded-xl bg-neutral-200",
+                  // The white frame from the reference, on the active
+                  // slide only. ring rather than border so it does not
+                  // change the box size and jog the scroll maths.
+                  "transition-shadow duration-500",
+                  isActive
+                    ? "shadow-2xl ring-8 ring-white"
+                    : "shadow-md ring-0",
+                ].join(" ")}
+              >
+                {/*
+                  THE UNIFORM WINDOW. Every slide is 16:10 and the photo is
+                  object-cover inside it — this is the "viewport trims them
+                  to rectangles" behaviour. object-center is the default
+                  and is what to change if a portrait crops through its
+                  subject.
+                */}
+                <div className="aspect-[16/10] w-full">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.w}
+                    height={image.h}
+                    /*
+                      Load-bearing. Without it React 19's SSR emits a
+                      high-priority <link rel="preload"> per image (root
+                      §9.13) — seven of them — competing with the hero's
+                      LCP element. This section is below the fold on both
+                      pages that render it.
+                    */
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover object-center"
+                  />
+                </div>
+              </div>
+            </figure>
+          );
+        })}
+      </div>
+
+      {/* Controls + CTA, back inside the padded container. */}
+      <div className="mx-auto w-full max-w-[1280px] px-6 md:px-10">
+        <div className="mt-8 flex items-center justify-center gap-5">
+          <button
+            type="button"
+            onClick={() => goTo(active - 1)}
+            disabled={active === 0}
+            className={arrowClass}
+            aria-label="Previous photo"
+            data-event="carousel_prev"
+            data-label="portfolio-gallery-prev"
+            {...tracking}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          {/* Dots. Buttons rather than decoration — they are the only
+              direct way to reach slide 6 without six taps. */}
+          <div className="flex items-center gap-2.5">
+            {images.map((image, i) => (
+              <button
+                key={image.src}
+                type="button"
+                onClick={() => goTo(i)}
+                className={[
+                  "h-2.5 rounded-full transition-all duration-300",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
+                  i === active
+                    ? "w-7 bg-brand-primary"
+                    : "w-2.5 bg-neutral-300 hover:bg-neutral-400",
+                ].join(" ")}
+                aria-label={`Go to photo ${i + 1} of ${images.length}`}
+                aria-current={i === active ? "true" : undefined}
+                data-event="carousel_dot"
+                data-label={`portfolio-gallery-dot-${i + 1}`}
+                {...tracking}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => goTo(active + 1)}
+            disabled={active === images.length - 1}
+            className={arrowClass}
+            aria-label="Next photo"
+            data-event="carousel_next"
+            data-label="portfolio-gallery-next"
+            {...tracking}
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <a
+            href={ctaHref}
+            className={[
+              "inline-flex items-center justify-center",
+              "bg-brand-primary px-10 py-4",
+              "text-sm font-semibold uppercase tracking-wide text-white",
+              "shadow-md transition-colors duration-200 hover:bg-brand-primary-hover",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
+            ].join(" ")}
+            data-event="click_cta"
+            data-label="portfolio-gallery-get-estimate"
+            {...tracking}
+          >
+            {ctaLabel}
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}

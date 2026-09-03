@@ -1,0 +1,21 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import AboutPage from "../components/websites/ExteriorBuilderServices/pages/EBS-About";
+import { CLIENT } from "../components/websites/ExteriorBuilderServices/config/client.config";
+
+const seo = {
+  title: `About ${CLIENT.business.name} | Trusted Since ${CLIENT.business.yearFounded} | ${CLIENT.seo.regionLabel}`,
+  description:
+    `Family-run and locally owned, serving ${CLIENT.geo.serviceArea} since ${CLIENT.business.yearFounded}. Roofing, siding and gutter work for homes and businesses, with free estimates.`,
+};
+---
+
+<Layout
+  title={seo.title}
+  description={seo.description}
+  ogImage={CLIENT.seo.ogImage}
+  gtmId={CLIENT.tracking.gtmId}
+  bodyClass={CLIENT.theme.bodyClass}
+>
+  <AboutPage client:load />
+</Layout>

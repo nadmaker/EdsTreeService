@@ -1,0 +1,286 @@
+---
+import "../styles/global.css";
+
+interface LayoutProps {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  lang?: string;
+  gtmId?: string;
+  bodyClass?: string;
+}
+
+const {
+  title = "Frame Sites",
+  description,
+  canonical,
+  ogImage,
+  noindex = false,
+  lang = "en",
+  gtmId,
+  bodyClass = "",
+} = Astro.props as LayoutProps;
+
+const canonicalUrl =
+  canonical ?? new URL(Astro.url.pathname, Astro.url.origin).toString();
+
+// Social crawlers will not reliably resolve a root-relative og:image, so
+// absolutize it here rather than per route. Routes and CLIENT.seo.ogImage
+// therefore store a short root-relative path (/images/foo.jpg); an
+// already-absolute URL passes through unchanged. Do NOT hardcode absolute
+// URLs per route — they bake in a domain that breaks on preview deploys and
+// on every fork. Do not "simplify" this away as redundant either: nothing in
+// local dev reveals what it prevents.
+const ogImageUrl = ogImage
+  ? new URL(ogImage, Astro.url.origin).toString()
+  : undefined;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>{title}</title>
+
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Semi+Condensed:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    {gtmId && (
+      <script
+        is:inline
+        set:html={`(function(w,d,s,l,i){
+  w[l]=w[l]||[];
+  w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+  var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),
+      dl=l!='dataLayer' ? '&l='+l : '';
+  j.async=true;
+  j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+  f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmId}');`}
+      />
+    )}
+  </head>
+
+  <body class={bodyClass}>
+    {gtmId && (
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+          height="0"
+          width="0"
+          style="display:none;visibility:hidden"
+        />
+      </noscript>
+    )}
+
+    <slot />
+
+    {gtmId && (
+      <script
+        is:inline
+        set:html={`(function () {
+  window.dataLayer = window.dataLayer || [];
+
+  function findTrackEl(el) {
+    while (el && el !== document.documentElement) {
+      if (el.dataset && el.dataset.event) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function isDisabled(el) {
+    if (!el) return false;
+    return !!(
+      el.disabled ||
+      el.getAttribute('aria-disabled') === 'true' ||
+      el.classList.contains('disabled')
+    );
+  }
+
+  function cleanValue(value) {
+    if (typeof value !== 'string') return value;
+    var trimmed = value.trim();
+    return trimmed ? trimmed : undefined;
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    var target = e.target;
+    if (!target || !(target instanceof Element)) return;
+
+    if (target.closest('input, textarea, select, option, label')) return;
+
+    var el = findTrackEl(target);
+    if (!el || isDisabled(el)) return;
+
+    var anchor = el.closest('a');
+
+    var payload = {
+      event: cleanValue(el.dataset.event),
+      label: cleanValue(el.dataset.label),
+      section: cleanValue(el.dataset.section),
+      service: cleanValue(el.dataset.service),
+      city: cleanValue(el.dataset.city),
+      page_type: cleanValue(el.dataset.pageType),
+      href: cleanValue(
+        el.getAttribute('href') ||
+        (anchor ? anchor.getAttribute('href') : '')
+      ),
+      text: cleanValue(
+        (el.dataset.text || el.textContent || '').trim().slice(0, 100)
+      )
+    };
+
+    Object.keys(payload).forEach(function (key) {
+      if (payload[key] === undefined) delete payload[key];
+    });
+
+    if (!payload.event) return;
+
+    window.dataLayer.push(payload);
+  }, true);
+})();`}
+      />
+    )}
+
+    {gtmId && (
+      <script
+        is:inline
+        set:html={`(function () {
+  window.dataLayer = window.dataLayer || [];
+
+  /*
+   * Vanilla view_section observer.
+   *
+   * Companion to the click bridge above: same job, same data-* contract,
+   * but for visibility instead of clicks. Exists so a component whose ONLY
+   * client-side need is a view_section IntersectionObserver can render with
+   * no client directive at all and still report -- a React useEffect observer
+   * silently stops firing when its island is removed, with no build error.
+   *
+   * OPT-IN by design: matches [data-track-view], not [data-section]. A
+   * generic [data-section] selector would start firing view_section for
+   * every section that carries the attribute but never had an observer,
+   * injecting an analytics data discontinuity, and would require removing
+   * every React observer at once or those sections would double-fire.
+   *
+   * INTENDED END STATE: migrate the remaining React observers in later
+   * batches, then drop [data-track-view] for a generic [data-section]
+   * selector once none are left. The attribute is a migration seam, not
+   * permanent API.
+   *
+   * Dedupe is by SECTION NAME, not element. A wrapper may render the same
+   * data-section on two elements (a desktop copy and a mobile copy); keying
+   * on the element would fire the name twice.
+   *
+   * Per-element threshold override via data-track-view-threshold (default
+   * 0.4). Optional data-slug is forwarded when present.
+   *
+   * Elements are queried once, after DOM parse. Every island is
+   * server-rendered so the nodes exist by then, and React hydration reuses
+   * existing DOM nodes rather than replacing them, so the observed
+   * references stay valid.
+   */
+  function cleanValue(value) {
+    if (typeof value !== 'string') return value;
+    var trimmed = value.trim();
+    return trimmed ? trimmed : undefined;
+  }
+
+  function initViewSectionTracking() {
+    var nodes = document.querySelectorAll('[data-track-view]');
+    if (!nodes.length) return;
+
+    var firedSections = {};
+
+    function onIntersect(entries, observer) {
+      for (var i = 0; i < entries.length; i++) {
+        var entry = entries[i];
+        if (!entry.isIntersecting) continue;
+
+        var section = cleanValue(entry.target.getAttribute('data-section'));
+        if (!section) continue;
+
+        observer.unobserve(entry.target);
+
+        if (firedSections[section]) continue;
+        firedSections[section] = true;
+
+        var payload = {
+          event: 'view_section',
+          section: section,
+          city: cleanValue(entry.target.getAttribute('data-city')),
+          service: cleanValue(entry.target.getAttribute('data-service')),
+          page_type: cleanValue(entry.target.getAttribute('data-page-type')),
+          slug: cleanValue(entry.target.getAttribute('data-slug'))
+        };
+
+        Object.keys(payload).forEach(function (key) {
+          if (payload[key] === undefined) delete payload[key];
+        });
+
+        window.dataLayer.push(payload);
+      }
+    }
+
+    var groups = {};
+
+    Array.prototype.forEach.call(nodes, function (el) {
+      if (!cleanValue(el.getAttribute('data-section'))) return;
+
+      var raw = parseFloat(el.getAttribute('data-track-view-threshold'));
+      var threshold = isNaN(raw) ? 0.4 : raw;
+      var key = String(threshold);
+
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(el);
+    });
+
+    Object.keys(groups).forEach(function (key) {
+      var observer = new IntersectionObserver(onIntersect, {
+        threshold: parseFloat(key)
+      });
+
+      groups[key].forEach(function (el) {
+        observer.observe(el);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initViewSectionTracking);
+  } else {
+    initViewSectionTracking();
+  }
+})();`}
+      />
+    )}
+  </body>
+</html>
