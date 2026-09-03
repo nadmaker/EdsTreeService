@@ -26,7 +26,8 @@ How to use it (instruction for every session):
 4. At the end, refresh the "last updated" line below, then write the
    dated session brief for the next chat.
 
-Last updated: **2026-09-04** (free-renames and hygiene pass).
+Last updated: **2026-09-04** (free-renames and hygiene pass, commit `6c70e97`;
+session brief `EdsTreeService_HANDOFF_Session-2026-09-04.md`).
 
 ---
 
