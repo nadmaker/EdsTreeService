@@ -251,25 +251,29 @@ export const CLIENT = {
   },
 
   // ─── Offers ───────────────────────────────────────────────────────────────
-  // ONE offer. "Free tree removal" was STRUCK 2026-09-03 — there is no such
-  // offer. There is NO /offers route (inherited from EBS, which deleted it).
-  // `items[0]` is read by FullStretchFaqWrapper, ServiceONEFaqWrapper,
-  // OurProcessStepsWrapper, ResidentialCommercialWrapper and
-  // OfferShowCaseWrapper; deleting this block breaks all five.
-  // ⚠️ validThrough is EMPTY on purpose: the intake has no real date and a
-  // placeholder must not ship (handoff §5). Nothing renders it today.
+  // NO promotional offer. "Free tree removal" was STRUCK 2026-09-03, and the
+  // "10% Off Your First Tree Service" discount was STRUCK 2026-09-04: the
+  // owner confirmed the ONLY offer this business makes is FREE ESTIMATES,
+  // which is a cleared claim carried in copy, not an entry here. There is NO
+  // /offers route (inherited from EBS, which deleted it).
+  // ⚠️ Keep `items` as an EMPTY, TYPED array rather than deleting the block.
+  // OfferShowCaseWrapper maps over it to build a lead slide and falls back to
+  // its two editorial slides when it is empty, so an empty array is a
+  // supported state; the explicit element type keeps `item` from inferring as
+  // `never` inside that map. The five-consumer warning that stood here was
+  // WRONG: FullStretchFaq, ServiceONEFaq, OurProcessSteps and
+  // ResidentialCommercial only MENTION offers in comments — their shipping
+  // copy is free-estimate wording and none of them reads this block.
   offers: {
-    items: [
-      {
-        id:           "first-tree-service-10-off",
-        title:        "10% Off Your First Tree Service",
-        badge:        "10% OFF",
-        description:  "New to Ed's? Take 10% off your first tree removal, trimming, stump grinding or storm clean-up job. Mention this offer when you book.",
-        minimumLabel: "",                    // none stated
-        validThrough: "",                    // OPEN — real rolling date needed
-        couponPath:   "",                    // no coupon asset exists
-      },
-    ],
+    items: [] as readonly {
+      id: string;
+      title: string;
+      badge: string;
+      description: string;
+      minimumLabel: string;
+      validThrough: string;
+      couponPath: string;
+    }[],
   },
 
 } as const;

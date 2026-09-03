@@ -26,7 +26,7 @@ How to use it (instruction for every session):
 4. At the end, refresh the "last updated" line below, then write the
    dated session brief for the next chat.
 
-Last updated: **2026-09-03** (fork session, commit `3be18b1`).
+Last updated: **2026-09-04** (free-renames and hygiene pass).
 
 ---
 
@@ -40,6 +40,149 @@ Everything generated must be Ed's-themed via tokens, never hardcoded values
 (`EdsTreeService_HANDOFF_Step0-Step1.md` §3) before it ships.
 
 ### Done so far
+
+### Free renames, the offer strike, and code hygiene (2026-09-04)
+
+The first working session after the fork. Scope was deliberately the work
+that is FREE NOW AND PERMANENT LATER — every section-name change stops being
+free the moment a GTM container exists — plus the hygiene items that needed
+no owner input. Two owner decisions arrived mid-session and changed it: no
+offer/offer-card work in this repo, and **the only offer the business makes
+is free estimates**. Nothing was deployed; the site is still undeployed and
+untracked, and every photograph is still a placeholder.
+
+**Owner decisions (2026-09-04), recorded where the value lives**
+
+1. **The 10% offer is struck.** "10% Off Your First Tree Service" was the one
+   entry in `CLIENT.offers.items` and the lead slide of the /about carousel.
+   The owner's word is that free estimates — already a cleared claim — is the
+   only offer. A discount the business does not give is a live false claim,
+   so this was treated as a CLAIMS REGISTER fix rather than offer feature
+   work. Recorded in `client.config.ts` and client CLAUDE.md §3.5.
+2. **No offer/offer-card work in this repo.** Consequently the `hero-offers`
+   rename (open item 8.4.9), which was in the session's original scope, was
+   NOT done. Skipped deliberately, not forgotten: the /about carousel's
+   future is undecided, and if the section is dropped the rename is moot. It
+   is still free while no container exists.
+
+**What was true before → what is true now**
+
+| | Before | Now |
+|---|---|---|
+| Landing form section | `contact-form` — the SAME name the home form emits, separable only by `page_type` | `landing-contact-form` |
+| Service-page form `view_section` | `data-section` present, NO observer of either mechanism — the conversion section never reported a view | Mechanism A (`data-track-view`), deduped by section name |
+| Service-page lead email | "Service: **tree-removal**" — the kebab tracking slug reaching a human | "Service: **Tree Removal**" via a new optional `serviceLabel` prop |
+| Home form scoping | `document.getElementById(id)` — the `#home-contact` anchor doubling as the form key | `data-form="contact-estimate"`; all four wrappers now canonical |
+| Home services grid | 5 tiles in a 4-column grid; CTA alone on row two | 3-up at lg, CTA spans 2; both rows fill at every breakpoint |
+| Hours | One /about FAQ answer | Footer, all 14 routes |
+| Offers | One 10% discount | None; /about carousel is two editorial slides |
+
+**Why each was done the way it was**
+
+- **The landing-form rename was checked for style coupling first.** The six
+  scoped `[data-section="contact-form"]` rules in `global.css` were in scope
+  on the six city landings the whole time. They were inert only because
+  LandingContactForm is Variant C and renders **zero `<label>` elements** for
+  those selectors to match — verified by grep before renaming. So the rename
+  is analytics-only with no visual consequence, and the "home only" comment
+  in `global.css` became true rather than aspirational. If anyone later gives
+  the landing form Subframe fields, it will no longer silently inherit the
+  dark-band styling.
+- **Mechanism A, not a React observer, on the service form.** ServicePageBLDR
+  mounts that wrapper TWICE per service page (a mobile copy and a sticky
+  desktop copy) under one section name. Mechanism A dedupes by section NAME,
+  so the pair cannot double-fire; a React observer keys on the element and
+  would have needed per-copy guard refs to reach the same place. Do not add
+  a React observer alongside it — together they double-fire.
+- **`service_type` was fixed additively.** A new OPTIONAL `serviceLabel` prop
+  with the old chain kept as the fallback (`serviceLabel || trackingService
+  || formName`), so a caller that passes no label behaves exactly as before.
+  The kebab slug is untouched as the tracking value — verified in served HTML
+  that service pages still emit `data-service="tree-removal"`. Only the API
+  payload changed, and only that one line wants the human name.
+- **No fifth service card was invented** to square the grid. A fifth service
+  would be an UNVERIFIED CAPABILITY claim (client CLAUDE.md §8.2.3). The CTA
+  tile spans instead. The span works only because the grid takes its children
+  directly (root §6.5) — wrapping the tiles in per-child divs would silently
+  break it, which is now a comment in the file.
+- **Hours went to the footer only**, not also the /contact info column. One
+  canonical placement rather than two to keep in step. The slot is optional
+  and the column count follows the same condition, so a future client with no
+  settled hours gets the 3-up contact row back rather than an empty cell.
+  ⚠️ This raises the stakes on the open Sunday question: the string is the
+  owner-cleared "Open every day, 8 AM–7 PM" printed VERBATIM and site-wide,
+  and must not be reworded to "7 days a week" until §8.2.2 is answered.
+
+**Measured (all 2026-09-04, dev server, served HTML)**
+
+- All **14 routes 200**, 212,727–300,590 bytes (was 211,948–299,755 on
+  2026-09-03; the ~800-byte rise is the footer hours cell on every route).
+- **"10% off" → 0 occurrences** across all fourteen routes. /about carousel
+  is 2 dots / 2 thumbs (was 3), and `edstree-gallery-4.jpg` — the offer
+  slide's photo — no longer appears on the page at all.
+- **Section inventory verified per route pattern**: the six landings emit
+  `landing-contact-form`, only the home page emits `contact-form`, and
+  `service-contact-form` appears **twice** on a service page, both carrying
+  `data-track-view`.
+- **Zero duplicate ids** on all six sampled route patterns.
+- **Banned-term sweep clean**: word-boundary `ISA`, `certified`, `arborist`,
+  `licensed`, `TCIA` all **0** across the concatenated HTML of all 14 routes.
+- **Image preloads**: home 2, service 2, city landing 2, **/about 4** — the
+  odd one out, logged as a new open item, not acted on.
+- `/og/default.jpg` 200 at **65,369 bytes** (unchanged — hero and logo
+  untouched); `/favicon.png` and the geojson 200; the must-404 set
+  (`/offers`, roofing/siding/gutter slugs, `/service-area/durham`,
+  `/reviews`) all 404.
+- Contrast: the footer's two contact captions moved `neutral-500` →
+  `neutral-600` for style-guide consistency beside the new hours caption.
+  On the white footer `neutral-500` measures **4.74:1**, which passes AA at
+  that size — so this was consistency, not a failure being fixed.
+- `npm run build` and `npx tsc --noEmit` both pass. tsc was canary-checked
+  (a deliberate type error produced exactly 1 diagnostic) per root §11.7,
+  because a silent tsc is indistinguishable from a clean one.
+
+**Two probes that lied, both worth remembering**
+
+1. **`grep -rlI $'\r' src` reported NO CRLF files on a tree that is 102 of
+   162 CRLF.** The fork session's note that "the four builders and the og
+   card" are CRLF is wrong and has been corrected in client CLAUDE.md §7.4:
+   it is all of `src/ui/`, `src/pages/api/contact.ts`, the og card, THREE of
+   the four builders (`EdsTree-Contact.tsx` is LF) and five section wrappers.
+   The symptom was a literal replacement failing with "found 0" against a
+   file that visibly contained the text. Enumerate with node
+   (`readFileSync(p,"utf8").includes("\r\n")`), never that grep.
+2. **A stale dev server answered on the port `astro dev` had NOT bound to.**
+   The new server reported port 4400 while 4399 also returned 200 — five
+   orphaned `node` dev-server processes were still running from earlier
+   sessions. Both happened to serve current code, but a sweep run against the
+   wrong one would have silently measured a different build. Always check the
+   port the server actually reports, and kill strays before sweeping.
+3. **A "1,414 hit" ISA alarm was `:disabled` in the inlined CSS.** Substring
+   grepping for short credential acronyms over served HTML is worthless;
+   use `\b` word boundaries. This is the third distinct instance of the
+   verify-the-probe rule paying for itself in this repo.
+
+**One tooling trap fixed at the source.** The scripted-copy-pass helper used
+`String.replace(find, replaceString)`, and a replacement containing `$'`
+(here, the literal shell snippet `grep -rlI $'\r'`) is interpreted by
+`String.replace` as "everything after the match" — it spliced the whole file
+tail in. The once-per-file assertion caught it before anything was written.
+The helper now passes a replacer FUNCTION (`() => replace`), which disables
+`$` interpretation entirely. Any future scripted pass should do the same.
+
+**Depends on / does not include**
+
+- Nothing here is verified in production; the site is still undeployed, so
+  the served-HTML evidence above is dev-server evidence (root §11.9: there is
+  no local production-equivalent server under the Vercel adapter).
+- All section renames remain free ONLY until a GTM container exists. The one
+  still outstanding is `hero-offers`.
+- The `service_type` fix cannot be end-to-end tested until Resend is
+  configured — there is still no key, no verified sending domain and no
+  domain. The fallback chain and the display name reaching the client were
+  verified statically instead (island props carry `"service":"Tree Removal"`).
+
+---
 
 ### The fork itself (2026-09-03)
 
@@ -141,8 +284,29 @@ session brief.
 ### 5.1 Scripted, asserted copy passes
 For any edit touching more than a handful of files, write a node script
 that replaces exact literals and asserts each occurs exactly once, so a
-drifted file fails loudly. Normalise CRLF → LF before matching and restore
-on write: the four builders and the og card are CRLF, most files are LF.
+drifted file fails loudly. Normalise CRLF → LF before matching and restore on write. ⚠️ CORRECTED
+2026-09-04: line endings are MIXED far more widely than the fork session
+recorded — 102 of 162 tracked files under src/ are CRLF (all of src/ui/,
+src/pages/api/contact.ts, the og card, THREE of the four builders — only
+EdsTree-Contact.tsx is LF — and five section wrappers: FooterWrapper,
+LandingServicesListWrapper, ServiceAreaGoogleMap, ServiceONEFaqWrapper,
+ServiceONEtallLocationWrapper), not "the four builders and the og card".
+The probe that produced the wrong number, `grep -rlI $'\r' src`, returns
+NOTHING on this tree; enumerate with node instead:
+`readFileSync(p,"utf8").includes("\r\n")`.
+WHY the tree is mixed, established 2026-09-04: .gitattributes is
+`* text=auto` and core.autocrlf is true, so git stores LF in the index and
+checks files out as CRLF on Windows. A file is CRLF because git last wrote
+it and LF because some other tool did. The endings therefore carry no
+meaning and the COMMIT is LF either way — preserving them on write is
+cosmetic, but normalising before matching is mandatory, because the literal
+you compose in a script is LF and most of the tree is not.
+⚠️ Pass the replacement as a FUNCTION, not a string. String.replace
+interprets `$'`, `$&` and a dollar-backtick inside the REPLACEMENT text, so
+a replacement that itself contained the literal `$'` spliced the entire
+file tail back in. Use .replace(find, () => replace). The once-per-file
+assertion caught it before anything was written; without that assertion it
+would have shipped a doubled document.
 Read the RAW lines before composing a literal — a comment-stripped view
 hides comment lines inside a block.
 
@@ -177,12 +341,15 @@ in step in the same commit.
 | **Google Maps key.** Extend the owner's existing key's referrer list to the new origin (or issue a new key), choose/clone the Map ID, set the two `PUBLIC_GOOGLE_MAPS_*_EDSTREE` vars, redeploy. Service pages show the fallback panel until then. | Open |
 | **Owner answers pending:** legal entity form (prints on /privacy); "every day" = 7 days?; capabilities list (crane implied, land clearing, tree health, cabling, firewood, commercial contracts — all UNVERIFIED, none shipping); offer expiry (`validThrough` empty, nothing renders it); guarantee terms beyond "satisfaction guaranteed"; own Google listing and number vs reusing EBS's. | Open |
 | **Draft copy without owner sign-off:** FAQs (/about six, service pages five), process steps (both wrappers), why-us cards, stats band, hero headline "Same-day tree removal, done safely", service one-liners, six city descriptions. All cleared-claims-only. | Open — content review |
-| **Home services grid: four cards + the CTA tile in a four-column grid** — the tile sits alone on row two at desktop. Not eyeballed during the fork. | Open — check in the first design pass |
-| **`contact-form` name collision.** LandingContactForm's `trackingSection` default is `contact-form`, the same as the home ContactFormWrapper. Separable only by page_type. Rename the landing form's section before a container exists. | Open — free now, permanent later |
-| **`hero-offers`** is the wrong name for the /about carousel (EBS 8.2.6); **`service-contact-form`** carries the attribute with no observer (EBS 8.6.2). | Open — free renames until Step 8 |
-| **Hours** (`CLIENT.business.hoursDisplay`) shown only in the /about FAQ; footer and contact column do not show them. | Open — copy decision |
-| **RightRail service-page form sends the kebab-case slug as `service_type`** ("Service: tree-removal" in lead emails) (EBS 8.3.3). | Open — one wrapper, one builder |
-| **ContactFormWrapper scopes with `getElementById`**; `data-form` is canonical (EBS 8.5.6). | Open — opportunistic |
+| ~~**Home services grid: four cards + the CTA tile in a four-column grid** — the tile sits alone on row two at desktop.~~ | ~~Open~~ **RESOLVED 2026-09-04** — 3-up at lg, CTA spans 2 |
+| ~~**`contact-form` name collision.** LandingContactForm's `trackingSection` default is `contact-form`, the same as the home ContactFormWrapper.~~ | ~~Open~~ **RESOLVED 2026-09-04** — now `landing-contact-form` |
+| **`hero-offers`** is still the wrong name for the /about carousel (EBS 8.2.6). ~~**`service-contact-form`** carries the attribute with no observer (EBS 8.6.2).~~ | `hero-offers` **still open** — deliberately skipped 2026-09-04 (no offer work in this repo, per owner); observer **RESOLVED 2026-09-04** |
+| ~~**Hours** (`CLIENT.business.hoursDisplay`) shown only in the /about FAQ; footer and contact column do not show them.~~ | ~~Open~~ **RESOLVED 2026-09-04** — footer, all 14 routes. /contact column deliberately left out: one canonical placement |
+| ~~**RightRail service-page form sends the kebab-case slug as `service_type`** ("Service: tree-removal" in lead emails) (EBS 8.3.3).~~ | ~~Open~~ **RESOLVED 2026-09-04** — new `serviceLabel` prop; emails read "Service: Tree Removal" |
+| ~~**ContactFormWrapper scopes with `getElementById`**; `data-form` is canonical (EBS 8.5.6).~~ | ~~Open~~ **RESOLVED 2026-09-04** — all four wrappers canonical |
+| **No promotional offer exists.** `CLIENT.offers.items` emptied 2026-09-04 on the owner's word that the only offer is FREE ESTIMATES. The /about carousel is two editorial slides. Never hardcode a third to fill it. | Closed as a decision — listed so it is not "fixed" back |
+| **/about ships FOUR image preloads**, every other route two (root §9.13). Measured 2026-09-04, not acted on; the carousel is the likely source. | Open — first performance pass |
+| **Footer legal row still `neutral-500`** (copyright, "Website Designed With") — 4.74:1 on the white footer, passes AA at body size. | Open — next style pass, deliberate choice |
 | **City landings have no `<h1>`** (HeroSectionAlt2 renders a span) (EBS 8.5.4). | Open — theme tab or wrapper-authored hero |
 | **768–1024px horizontal overflow band** (EBS 8.5.3) — not re-measured here. | Open — re-measure |
 | **Two service-area map implementations** (inline SVG on home + landings; Google Maps on service pages) (EBS 8.5.8). | Deferred, deliberate |

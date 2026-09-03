@@ -240,6 +240,20 @@ export default function FooterSection({
       */
       addressLine1={`${CLIENT.geo.hqCity}, ${CLIENT.geo.hqState}`}
       addressLine2={CLIENT.geo.serviceArea}
+      /*
+        Hours, added 2026-09-04. They were reaching visitors on ONE route —
+        an /about FAQ answer — which is the least likely place anyone looks
+        for them; the footer puts them on all 14.
+
+        ⚠️ CLAIMS: printed VERBATIM from CLIENT.business.hoursDisplay, which
+        is the owner-cleared string ("Open every day, 8 AM–7 PM"). Do NOT
+        rewrite it here as "7 days a week" or "Open 7 days": whether "every
+        day" includes Sunday is still an open owner question (client
+        CLAUDE.md §8.2.2), and this slot now carries the answer site-wide
+        rather than on one page. Same reason it must never grow into "always
+        open", "24/7" or any response promise — all MUST NOT SHIP.
+      */
+      hours={CLIENT.business.hoursDisplay}
       copyright={`© ${new Date().getFullYear()} ${CLIENT.business.name}. All rights reserved.`}
       designerName={
         <a

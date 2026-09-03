@@ -261,6 +261,13 @@ html:has(body.theme-edstree) {
    Section: [data-section="contact-form"] (ContactFormWrapper, home only).
    Inherited from EBS; the colours were re-derived for the green palette.
 
+   ⚠️ "home only" became TRUE on 2026-09-04. Until then LandingContactForm
+   also emitted section "contact-form", so these rules were in scope on the
+   six city landings too — inert only because that form is Variant C and
+   renders no <label> elements for the selectors below to match. It now
+   emits "landing-contact-form". If a future edit gives the landing form
+   Subframe fields, it will NOT silently inherit this dark-band styling.
+
    WHY THIS IS HERE AND NOT IN THE WRAPPER (root §7.5):
    Subframe's TextField and TextArea paint themselves for a LIGHT ground —
    bg-default-background on the box, neutral-border, text-default-font on the

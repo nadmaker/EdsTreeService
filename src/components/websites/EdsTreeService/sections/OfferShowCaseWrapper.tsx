@@ -47,36 +47,29 @@ export default function OfferShowCaseWrapper({
   const hasTrackedSectionRef = useRef(false);
 
   /**
-   * THREE SLIDES, ONLY THE FIRST OF WHICH IS AN OFFER.
+   * TWO EDITORIAL SLIDES, NO OFFER SLIDE.
    *
-   * ⚠️ This array previously held three HARDCODED slides, none of them
-   * EBS's, on all six city landings:
+   * `CLIENT.offers.items` is EMPTY as of 2026-09-04: the owner confirmed the
+   * only offer this business makes is FREE ESTIMATES, so the "10% Off Your
+   * First Tree Service" slide this map used to produce is gone. The map is
+   * kept rather than deleted — it is the supported path back if a real
+   * promotion ever exists, and it keeps client.config.ts the single source
+   * of truth for offers (client CLAUDE.md §3.5) instead of a hardcoded slide.
    *
-   *   · "20% Off Your First Service" — a discount EBS does not offer. An
-   *     invented price claim is the most costly kind of stale copy on the
-   *     site; a visitor can hold the company to it.
-   *   · "Pre-Spring Pruning — Returning Customers Get 15% Off All Pruning"
-   *     — tree work, and a second invented discount.
-   *   · "Dealing with an Emergency? Get a dependable expert immediately" —
-   *     emergency framing, which the CLAIMS REGISTER bans outright because
-   *     EBS has no emergency line.
-   *
-   * Slide 1 is now driven by `client.config.ts`, which has been the single
-   * source of truth for offers all along (client CLAUDE.md §3.5) — this
-   * section simply never read it. Adding an offer there adds a slide here
-   * and a card on /offers, with no code change.
-   *
-   * Slides 2 and 3 are NOT offers and deliberately do not pretend to be.
-   * EBS runs one promotion, so inventing two more to fill a three-slide
-   * carousel is what produced the two fake discounts above. They are
-   * editorial instead: one pointing at the company, one at the work.
+   * ⚠️ NEVER hardcode a slide here to fill the carousel. That is precisely
+   * what produced this section's previous three fake slides — two invented
+   * discounts ("20% Off Your First Service", "15% Off All Pruning") and an
+   * emergency-framed slide, all three banned by the CLAIMS REGISTER. Two
+   * slides is a perfectly good carousel; an invented third is a price claim
+   * a visitor can hold the company to.
    *
    * ⚠️ CLAIMS: every line below is drawn from the CLEARED list only —
-   * family-run and locally owned, in business since yearFounded, licensed
-   * bonded and insured, residential and commercial, free estimates. No star
-   * rating, no review count, no BBB, no trade association, no emergency or
-   * 24-7 language, and nothing from the UNVERIFIED CAPABILITIES list
-   * (insurance claims, roof cleaning, storm tarping, membrane systems).
+   * family-run and locally owned, in business since yearFounded, bonded and
+   * insured, residential and commercial, free estimates. NOT "licensed": NC
+   * does not license tree work and Ed's holds none. No certification or
+   * arborist credential, no star rating, no review count, no BBB, no trade
+   * association, no emergency or 24-7 language, and nothing from the
+   * UNVERIFIED CAPABILITIES list.
    *
    * ⚠️ The year is DERIVED from CLIENT.business.yearFounded, never typed.
    * A hardcoded "20 years" silently rots by one every January.

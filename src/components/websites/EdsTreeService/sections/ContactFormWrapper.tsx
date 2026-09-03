@@ -207,7 +207,17 @@ export default function ContactFormWrapper({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const root = document.getElementById(id);
+    /*
+      Scoped on data-form, not getElementById (migrated 2026-09-04, client
+      CLAUDE.md §8.4.2; root §10.7 makes data-form canonical). `id` is a
+      general-purpose attribute — it is this section's anchor target, used by
+      every "#home-contact" CTA on the page — so overloading it as the form's
+      scoping key coupled the focusin listener to the anchor name. Change the
+      anchor and form_start stops firing, with no error: the listener simply
+      never attaches. formId is already the event-payload key and the
+      uniqueness key, so it is the one identifier this needs.
+    */
+    const root = document.querySelector(`[data-form="${formId}"]`);
     if (!root) return;
 
     const form = root.querySelector("form");
@@ -232,7 +242,7 @@ export default function ContactFormWrapper({
 
     form.addEventListener("focusin", onFocusIn);
     return () => form.removeEventListener("focusin", onFocusIn);
-  }, [id, formId, formName, trackingSection, trackingCity, trackingService, trackingPageType]);
+  }, [formId, formName, trackingSection, trackingCity, trackingService, trackingPageType]);
 
   const pushSubmitAttempt = () => {
     if (hasSubmittedRef.current) return;
@@ -382,6 +392,10 @@ export default function ContactFormWrapper({
     <section
       id={id}
       ref={sectionRef}
+      /* The scoping key for the focusin listener above. Separate from
+         data-section and from id, and not redundant with either (root
+         §10.7) — removing it silently kills form_start on this page. */
+      data-form={formId}
       /* Dark band, to the supplied reference. bg-default-font is the navy
          the site already uses for dark surfaces (the service-page hero
          scrim is bg-default-font/72), so this re-skins on a fork instead

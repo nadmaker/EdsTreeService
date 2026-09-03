@@ -18,6 +18,13 @@ export interface RightRailContactFormStickyWrapperProps {
   formId?: string;
   formName?: string;
   siteKey?: string;
+  /**
+   * HUMAN-READABLE service name for the lead email's "Service:" line —
+   * "Tree Removal", not "tree-removal". Optional and additive: omitted, the
+   * payload falls back to the old behaviour. See the service_type comment in
+   * the submit handler for why this exists.
+   */
+  serviceLabel?: string;
 
   /** Tracking context */
   trackingSection?: string;
@@ -42,6 +49,7 @@ export default function RightRailContactFormStickyWrapper({
 
   formId = "service-contact-form",
   formName = "Service Page Contact",
+  serviceLabel,
   siteKey = CLIENT.siteKey,
 
   trackingSection = "service-contact-form",
@@ -142,7 +150,17 @@ export default function RightRailContactFormStickyWrapper({
           phone: phone.trim(),
           address: address.trim(),
           message: message.trim(),
-          service_type: trackingService || formName,
+          /*
+            ⚠️ DISPLAY NAME, not the tracking slug (fixed 2026-09-04, client
+            CLAUDE.md §8.4.1). This field is not analytics — /api/contact
+            renders it verbatim into the lead email, so for two years of EBS
+            and every service page here it read "Service: tree-removal".
+            `trackingService` is the kebab-case GA4 join key and MUST stay
+            kebab-case everywhere else in this file; only this one line wants
+            the human name. Falls back to the old chain when the consumer
+            passes no label, so nothing breaks for a caller that has none.
+          */
+          service_type: serviceLabel || trackingService || formName,
           company: company.trim(),
           started_at_ms: startedAtRef.current,
         }),
@@ -184,10 +202,27 @@ export default function RightRailContactFormStickyWrapper({
   const labelClass = "text-sm font-medium text-default-font";
 
   return (
+    /*
+      data-track-view added 2026-09-04. This section carried data-section but
+      NO view_section observer of any kind (client CLAUDE.md §8.4.9), so it
+      was the one section on a service page that never reported a view — a
+      silent gap, since a missing observer produces no error and no warning.
+
+      Mechanism A (the vanilla [data-track-view] observer in Layout.astro,
+      root §8.2) rather than a React one, and the choice is load-bearing
+      here: ServicePageBLDR mounts this wrapper TWICE per service page — a
+      mobile copy and a sticky desktop copy — both emitting section
+      "service-contact-form". Mechanism A dedupes by SECTION NAME, so the two
+      copies cannot double-fire. A React observer keys on the element and
+      would need per-copy guard refs to reach the same result.
+
+      Do NOT also add a React observer: the two together double-fire.
+    */
     <div
       id={id}
       data-form={formId}
       className={[cardMaxWidthClassName, className].filter(Boolean).join(" ")}
+      data-track-view
       data-section={trackingSection}
       data-city={trackingCity}
       data-service={trackingService}

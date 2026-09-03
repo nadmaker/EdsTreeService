@@ -303,10 +303,16 @@ export default function ServicesGridSectionWrapper({
           {caption}
         </p>
 
-        {/* 8 tiles — 7 services plus the CTA — which is why the grid is
-            4-up at lg and 2-up at sm: both divide evenly, so no row ends
-            ragged. A 7-tile grid leaves a hole at every column count. */}
-        <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 5 tiles — 4 services plus the CTA. EBS had 8 (7 services + CTA),
+            which divided evenly 4-up at lg and 2-up at sm; 5 does not divide
+            evenly at any column count, so the CTA tile SPANS instead. 3-up at
+            lg gives row 1 = three services and row 2 = the fourth service
+            plus a 2-wide CTA; 2-up at sm gives a 2×2 service block with a
+            2-wide CTA beneath. Both rows fill completely at every breakpoint.
+            ⚠️ The span classes live on the CTA anchor below, and they only
+            work because this grid takes its children DIRECTLY (root §6.5) —
+            wrapping the tiles in per-child divs would silently break it. */}
+        <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service) => (
             <a
               key={service.slug}
@@ -397,6 +403,9 @@ export default function ServicesGridSectionWrapper({
             href={ctaHref}
             className={[
               "group flex flex-col rounded-lg bg-[var(--color-default-font)] p-6",
+              // Fills the row the four service cards leave ragged — see the
+              // grid comment above. Spans the full 2 at sm and 2 of 3 at lg.
+              "sm:col-span-2 lg:col-span-2",
               "transition-all duration-200 hover:-translate-y-1 hover:shadow-lg",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-secondary focus-visible:ring-offset-2",
             ].join(" ")}

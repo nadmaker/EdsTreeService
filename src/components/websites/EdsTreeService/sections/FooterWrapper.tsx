@@ -3,6 +3,7 @@
 import React from "react";
 import {
   FeatherAtSign,
+  FeatherClock,
   FeatherGlobe,
   FeatherHousePlug,
   FeatherPhone,
@@ -31,6 +32,8 @@ export interface FooterWrapperProps {
   phone?: React.ReactNode;
   addressLine1?: React.ReactNode;
   addressLine2?: React.ReactNode;
+  /** Opening hours. Omit it and the hours cell is not rendered at all. */
+  hours?: React.ReactNode;
   copyright?: React.ReactNode;
   designerName?: React.ReactNode;
 }
@@ -53,6 +56,7 @@ export default function FooterWrapper({
   phone,
   addressLine1,
   addressLine2,
+  hours,
   copyright,
   designerName,
 }: FooterWrapperProps) {
@@ -145,15 +149,22 @@ export default function FooterWrapper({
 
           <div className="my-10 h-px w-full bg-neutral-200" />
 
-          {/* Contact row — three stacks: email left, phone centre, address
-              right. Was TWO columns with the email centred inside its own
-              half, which left a hole in the middle of the row and made the
-              email look arbitrarily placed rather than aligned to anything.
-              Each cell now declares its own alignment, so the row reads as
-              left / centre / right instead of relying on the column split.
-              Stacks to one centred column below md. */}
+          {/* Contact row — four stacks: email, phone, hours, address. It was
+              TWO columns with the email centred inside its own half, which
+              left a hole in the middle of the row and made the email look
+              arbitrarily placed rather than aligned to anything; then three.
+              Each cell declares its own alignment, so the row reads
+              left / centre / centre / right rather than relying on the
+              column split. Stacks to one centred column below md.
+              ⚠️ The hours cell renders ONLY when the consumer passes
+              `hours`, and the column count follows the same condition: a
+              client with no settled hours gets the 3-up row back rather than
+              an empty fourth column. */}
           <div
-            className="grid grid-cols-1 gap-8 md:grid-cols-3"
+            className={[
+              "grid grid-cols-1 gap-8",
+              hours ? "md:grid-cols-4" : "md:grid-cols-3",
+            ].join(" ")}
             data-group="footer-contact-row"
           >
             <div
@@ -164,7 +175,7 @@ export default function FooterWrapper({
                 <FeatherAtSign className="text-white" />
               </div>
               <div>
-                <div className="text-caption font-caption text-neutral-500">
+                <div className="text-caption font-caption text-neutral-600">
                   Connected With Us Now!
                 </div>
                 <div className="text-body font-body text-default-font">{email}</div>
@@ -181,7 +192,7 @@ export default function FooterWrapper({
 
                 It is also always mounted and never conditionally rendered,
                 which is the other half of that rule: the scanner only sees
-                what exists at parse time. The footer renders on all 18
+                what exists at parse time. The footer renders on all 14 HTML
                 routes, so this adds a swap-eligible surface site-wide —
                 add it to client CLAUDE.md §3.6's eligible list when the
                 GTM container is built. */}
@@ -193,12 +204,31 @@ export default function FooterWrapper({
                 <FeatherPhone className="text-white" />
               </div>
               <div>
-                <div className="text-caption font-caption text-neutral-500">
+                <div className="text-caption font-caption text-neutral-600">
                   Call Us Today!
                 </div>
                 <div className="text-body font-body text-default-font">{phone}</div>
               </div>
             </div>
+
+            {hours ? (
+              <div
+                className="flex items-center justify-center gap-3"
+                data-group="footer-hours"
+              >
+                <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-brand-primary">
+                  <FeatherClock className="text-white" />
+                </div>
+                <div>
+                  <div className="text-caption font-caption text-neutral-600">
+                    We&rsquo;re Open
+                  </div>
+                  <div className="text-body font-body text-default-font">
+                    {hours}
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             <div
               className="flex items-center justify-center gap-3 md:justify-end"
