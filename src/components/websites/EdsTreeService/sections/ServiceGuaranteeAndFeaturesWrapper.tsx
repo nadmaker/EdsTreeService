@@ -259,27 +259,37 @@ export default function ServiceGuaranteeAndFeaturesWrapper({
     <section
       id={id}
       className={[
-        // `relative isolate` is required by the shingle layers below, not
-        // decoration: they blend with their BACKDROP, and without a stacking
-        // context of its own that backdrop is whatever the page painted
-        // beneath this section.
-        // bg-white, not the grey the shingle version used. The reference is
-        // white paper, and white also restores this section's original seam
-        // relationship: reviews above is bg-default-background (#F5F8FB) and
-        // the stats band below is navy, so white here is the light step
-        // between a near-white section and a dark one.
-        // ⚠️ NO mt-8 HERE — it was removed 2026-08-31 and must not come back.
-        // A MARGIN sits outside the background box, so the texture layers
-        // (absolute inset-0) cannot reach it: it rendered as a 32px
-        // untextured strip across the top of the section, with a hard edge
-        // where the creases began. It had been harmless for as long as this
-        // section was plain white on a white page — the gap was invisible
-        // because it matched. Adding a background made an existing bug
-        // visible rather than introducing one.
-        // If top breathing room is ever wanted here, it has to be PADDING,
-        // which is inside the background and gets textured with everything
-        // else. pt-4 / md:pt-2 below already does that job.
-        "relative isolate w-full overflow-x-hidden bg-white px-6 pt-4 md:px-10 md:pt-2",
+        // PLAIN --color-brand-50 (#F0F9F2), NO TEXTURE (2026-09-04, by
+        // request: "the white shade from our theme style guide").
+        // ⚠️ THE TOKEN, NOT THE HEX (root §13.2.2). #F0F9F2 is already in the
+        // theme as --color-brand-50, the lightest tint of the derived brand
+        // ramp, so `bg-brand-50` is the same colour that forks correctly;
+        // writing bg-[#F0F9F2] would freeze this client's green into a
+        // template-shared wrapper.
+        // Contrast on it, measured: default-font 15.35:1, brand-primary
+        // 5.07:1, neutral-600 7.03:1 — all pass. The amber eyebrow is 2.37:1
+        // and still fails; that is the standing §8.4.20 item, unchanged by
+        // this ground and not introduced by it.
+        // What this replaced, so it is not "restored" by accident:
+        // bg-white carrying a stretched folded-paper crease sheet plus grain,
+        // two mix-blend-multiply layers. Both layers are gone and so is the
+        // `relative isolate` that existed ONLY for them — those layers blended
+        // with their backdrop, so without a stacking context of its own that
+        // backdrop was whatever the page painted beneath this section. With
+        // no blending left there is nothing to isolate.
+        // `overflow-x-hidden` STAYS: it is about the content, not the layers.
+        // ⚠️ NO mt-8 HERE — removed 2026-08-31, must not come back. A MARGIN
+        // sits outside the background box, so it paints the PAGE colour
+        // rather than this section's. That used to be loud, because the
+        // texture layers (absolute inset-0) could not reach it either and it
+        // rendered as a 32px untextured strip with a hard edge where the
+        // creases began. It is now NEARLY SILENT — brand-50 (#F0F9F2) and the
+        // page background (#EDFAEF) differ by 3/1/3 per channel, so a stray
+        // top margin would add 32px while looking like almost nothing.
+        // Nearly-invisible is worse than loud. If top breathing room is ever
+        // wanted, it has to be PADDING, which is inside the background box;
+        // pt-4 / md:pt-2 below already does that.
+        "w-full overflow-x-hidden bg-brand-50 px-6 pt-4 md:px-10 md:pt-2",
         className,
       ]
         .filter(Boolean)
@@ -290,61 +300,27 @@ export default function ServiceGuaranteeAndFeaturesWrapper({
       data-service={trackingService}
       data-page-type={trackingPageType}
     >
-      {/* ── SHINGLE GROUND ─────────────────────────────────────────────────
-          Staggered architectural shingle courses, to a supplied reference.
-          Procedural — the tile and the full geometry note live in global.css
-          under body.theme-ebs. No image file, which matters more here than
-          anywhere else on the site: a shingle PHOTOGRAPH on a roofing
-          company's page is the single texture most likely to turn out to be
-          a competitor's roof.
+      {/* ⚠️ THE FOLDED-PAPER GROUND WAS REMOVED HERE on 2026-09-04, by
+          request: this section is a plain --color-default-background band
+          with no texture at all. Two mix-blend-multiply layers used to sit
+          here — one stretched --site-tex-creases sheet at 85% and
+          --site-tex-grain at 5%.
 
-          FOLDED-PAPER CREASES, to a supplied reference. This replaced a
-          shingle tile the same day (2026-08-31) — two versions of it, a
-          geometry-only first pass and then "Grey slate" from the shingle
-          study. Both are gone. The tokens survive in global.css, marked
-          unused, until this direction is confirmed.
-
-          WHY THE SWAP IS AN IMPROVEMENT AND NOT JUST A PREFERENCE. Drawn
-          shingle tabs kept drifting toward reading as TILE or BRICK — evenly
-          spaced vertical joints on a light ground do that no matter how the
-          shading is tuned, and it is a bad thing to evoke on a roofing
-          company's page. Creases avoid the trap entirely by not depicting a
-          material at all. A roof IS a set of intersecting planes — ridges,
-          valleys, hips — so faceted folds carry roof geometry without
-          claiming to be shingles.
-
-          ⚠️ NOT A TILE. Every other texture in this codebase repeats; this
-          one does not. The SVG is preserveAspectRatio='none' and the layer is
-          bg-[length:100%_100%] bg-no-repeat, so ONE sheet stretches across
-          the whole section however tall it gets. Consequences worth knowing:
-          there is no seam to keep in step, but the creases DO skew as the
-          section's aspect ratio changes — which is correct for a stretched
-          sheet and is why the angles are shallow. Do not "fix" this by
-          giving it a pixel background-size; that turns it into a tile and
-          the creases stop reaching the edges, which is the whole effect.
-
-          ⚠️ THE GRAIN IS TECHNICAL, NOT DECORATIVE, and this is the one thing
-          most likely to be deleted as pointless. These are very large, very
-          shallow gradients — precisely the case 8-bit displays render as
-          visible BANDING across a section this wide. The noise dithers it
-          away. Remove it and banding appears on some monitors and not
-          others, which makes it a bug that reproduces for one person and not
-          the next. It is at 5%, far below the strength it carries on the
-          concrete ground where it is genuinely texture.
-
-          Both layers are mix-blend-multiply, so the black fills take their
-          hue from bg-white beneath. Change the ground and the creases
-          re-tint for free.
-          ──────────────────────────────────────────────────────────────── */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-creases)] bg-[length:100%_100%] bg-no-repeat opacity-[0.85] mix-blend-multiply"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-grain)] bg-[length:140px] opacity-[0.05] mix-blend-multiply"
-      />
-
+          Recorded rather than silently deleted, because two things about
+          them are easy to get wrong if they are ever restored:
+          · The sheet was NOT a tile. preserveAspectRatio=none plus
+            bg-[length:100%_100%] bg-no-repeat stretched ONE sheet over the
+            whole section, so the creases skewed with the section aspect
+            ratio — correct for a stretched sheet, and why the angles were
+            shallow. A pixel background-size turns it into a tile and the
+            creases stop reaching the edges, which was the whole effect.
+          · The grain was TECHNICAL, not decorative. Those crease gradients
+            are very large and very shallow, which is exactly what 8-bit
+            displays render as visible banding; the noise dithered it away.
+            Dropping the grain while keeping the creases reintroduces
+            banding on some monitors and not others.
+          --site-tex-creases is still consumed by LandingContactForm, so
+          the token is not orphaned by this removal. */}
       {/* `relative` lifts the content above the two texture layers. */}
       <div className="relative mx-auto w-full max-w-[1280px]">
         <div className="flex w-full flex-col py-12 md:grid md:grid-cols-2 md:gap-x-16">

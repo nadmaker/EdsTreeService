@@ -5,8 +5,10 @@ import HeroFormCardWrapper from "../sections/HeroFormCardWrapper";
 import HeroEstimateFormWrapper from "../sections/HeroEstimateFormWrapper";
 import TrustBadgesWrapper from "../sections/TrustBadgesWrapper";
 import AboutUsVariant2 from "../sections/AboutUsVariant2";
+import OurProcessStepsWrapper from "../sections/OurProcessStepsWrapper";
 import BusinessStatisticsWrapper from "../sections/BusinessStatisticsWrapper";
 import ServiceGuaranteeAndFeaturesWrapper from "../sections/ServiceGuaranteeAndFeaturesWrapper";
+import FullStretchFaqWrapper from "../sections/FullStretchFaqWrapper";
 import ServicesGridSectionWrapper from "../sections/ServicesGridSectionWrapper";
 import PortfolioGalleryWrapper from "../sections/PortfolioGalleryWrapper";
 import ContactFormWrapper from "../sections/ContactFormWrapper";
@@ -142,6 +144,35 @@ export default function HomePage() {
         <AboutUsVariant2 {...TRACKING} />
       </section>
 
+      {/* How it works — the five-step process, HORIZONTAL.
+
+          NEW 2026-09-04. The same component /contact uses, mounted a
+          second time with layout="row": full container width, headline
+          left / intro right, five steps across one connector rail, centred
+          CTA, white ground. /contact keeps layout="column" (the default)
+          because a sticky contact form owns the right half of the section
+          on that page. The five STEPS and their icons are shared.
+
+          Placed HERE, between the company story and the service list,
+          because it answers the question those two create: the About band
+          says who Ed is and the grid says what he sells — this says what
+          actually happens if you call, which is the objection sitting
+          between them on a paid-traffic landing page.
+
+          NO id WRAPPER, and that is checked rather than assumed: nothing
+          in src/ links to #our-process. The anchor exists only on the
+          /contact builder wrapper, where it is likewise unreferenced.
+          Adding one here would emit a second dead anchor — root §6.6.1.
+
+          ctaHref points at this page own bottom form (#home-contact),
+          the same anchor the gallery CTA uses, rather than the wrapper
+          default of #contact-info-form which exists only on /contact.
+
+          Surfaces: AboutUsVariant2 above is --color-default-font at md+,
+          the grid below is --color-ground-concrete. The wrapper paints
+          itself white in row mode for exactly that pair; if this section
+          ever moves, re-derive the ground rather than trusting this note. */}
+      <OurProcessStepsWrapper layout="row" ctaHref="#home-contact" {...TRACKING} />
       {/* Services grid — answers "what exactly do you do".
           No id here: ServicesGridSectionWrapper already defaults
           id="services" on its OWN root, so wrapping it in a section with
@@ -184,8 +215,32 @@ export default function HomePage() {
           utilities (py-*), so the later rule wins — verified in the built CSS,
           not assumed. */}
       <section id="portfolio-gallery" className="w-full">
+        {/* surface="paper", NOT a className override, and the wrapper's prop
+            comment carries the full reasoning. Short version: it sets the
+            ground AND the folded-paper crease sheet together, because they
+            are not independent — the crease layers are mix-blend-multiply and
+            take their hue from the ground beneath, and they need
+            `relative isolate` on the section root to blend against it rather
+            than against whatever the page painted below.
+
+            HOME ONLY — this wrapper is also mounted on /contact, which keeps
+            the plain page background. Same reasoning as the md:pb-14 above.
+
+            ⚠️ TWO CONSEQUENCES, both intended, both asked for on 2026-09-04:
+            · There is now NO seam between this section and
+              ServiceGuaranteeAndFeaturesWrapper directly below — both are
+              bg-white and they run as one continuous field. Matching the map
+              section's ground was the request.
+            · The wrapper wears --site-tex-creases-ALT, not the `creases`
+              sheet the map section wears, and that is deliberate: global.css
+              keeps three arrangements precisely so two sections do not wear
+              the identical sheet, and these two are adjacent with no seam,
+              which is the worst case for it. `creases-alt` is free on this
+              page only because its other consumer, TallServicesBenefitsCards,
+              is mounted on the service and city routes and never on home. */}
         <PortfolioGalleryWrapper
           className="md:pb-14"
+          surface="paper"
           ctaHref="#home-contact"
           {...TRACKING}
         />
@@ -202,6 +257,38 @@ export default function HomePage() {
       <section id="service-area" className="w-full">
         <ServiceGuaranteeAndFeaturesWrapper {...TRACKING} />
       </section>
+
+      {/* FAQ — the same accordion /about carries, mounted a second time.
+
+          NEW 2026-09-04, placed directly under service-area by request. It
+          answers the leftover objections ("are estimates free", "do you
+          serve my address", "are you insured") at the point the coverage
+          section has just made the visitor consider calling, and before the
+          stats band closes the page out.
+
+          NO id WRAPPER, and that is checked rather than assumed: nothing in
+          src/ links to #faq — /about's own <section id="faq"> is itself an
+          unreferenced anchor. The wrapper defaults `id` to undefined, so
+          adding one here would only emit a second dead anchor (root
+          §6.6.1). It DOES self-default trackingSection="faq", which is
+          unique on this page.
+
+          NO PROPS BEYOND TRACKING, deliberately: the wrapper's heading and
+          `defaultFaqItems` read from CLIENT and ARE the live copy on both
+          routes (root §13.3.8). Edit them in the wrapper, not here — and
+          note that any edit there now changes /about and the home page
+          together, which is the intent (one answer, two surfaces) but is
+          worth knowing before rewording anything.
+
+          Surfaces: service-area above is bg-white and the stats band below
+          is --color-default-font (near-black), so this section's
+          bg-default-background sits between a white ground and a dark one —
+          the same white-above pairing it already has on /about, where
+          OfferShowCaseWrapper is likewise bg-white. Both this section and
+          service-area carry creases textures, but on different grounds, so
+          the seam survives. If this block moves, re-derive that rather than
+          trusting this note. */}
+      <FullStretchFaqWrapper {...TRACKING} />
 
       {/* Stats */}
       <section id="stats" className="w-full">

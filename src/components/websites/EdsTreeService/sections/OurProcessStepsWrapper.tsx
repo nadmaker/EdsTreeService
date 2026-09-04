@@ -2,7 +2,51 @@ import React from "react";
 import { CLIENT } from "@/components/websites/EdsTreeService/config/client.config";
 
 /**
- * EBS — "How it works" process section. Contact page only.
+ * Ed's — "How it works" process section. TWO layouts, one component:
+ * `column` (the default, /contact) and `row` (the home page).
+ *
+ * ── 2026-09-04, Ed's: tree steps, a row layout, and two owner overrides ──
+ *
+ * WHAT CHANGED
+ *  · The five step ICONS and LABELS are now tree-specific and are SHARED by
+ *    both pages (Ryan, 2026-09-04): tell us about the tree → free on-site
+ *    look → you get the estimate → we set the date → our own crew does the
+ *    work. The generic contractor set (handset, clipboard, document, hard
+ *    hat) is gone.
+ *  · A `layout` prop was added. `column` reproduces the /contact layout
+ *    byte-for-byte — everything inside PROCESS_MEASURE, 2-up steps, left
+ *    aligned — because a contact form still occupies that page's right half.
+ *    `row` is the ORIGINAL pre-2026-09-02 design restored and taken further:
+ *    full container width, headline left / intro right, five steps across on
+ *    one connector rail, centred supporting line and CTA.
+ *  · The home page mounts it between AboutUsVariant2 and the services grid
+ *    with layout="row" on a WHITE ground. White is load-bearing: the About
+ *    band above is --color-default-font at md+, and the services grid below
+ *    is --color-ground-concrete (#E7F5E9). The page-background token here
+ *    would be one step off the grid and produce no seam at all.
+ *
+ * ⚠️ OWNER OVERRIDE 1 — AMBER IS UNRESTRICTED IN THIS SECTION.
+ * Ryan, 2026-09-04: "amber is allowed in this section; delete or bypass the
+ * amber-cannot-be-used-as-text/border/divider rule for this component."
+ * So the eyebrow, the connector rail, the icon tiles and the CTA are amber.
+ * Recorded with the objection, per the log's §2 override discipline:
+ * --color-brand-secondary (#E68E1C) measures 2.55:1 on white and 2.37:1 on
+ * the page background. As TEXT that misses WCAG AA at every size (4.5:1
+ * normal, 3:1 large). Where amber carries type here it is a FILL with
+ * --color-default-font labels on it, which is 6.48:1 and passes — that is
+ * the style guide's own body-on-secondary pair and is how the amber does
+ * most of its work. The eyebrow is the one place amber is literally the
+ * text colour, and it is the one element that does not meet AA.
+ * Do not "fix" this back without asking; it is a decision, not a defect.
+ *
+ * ⚠️ OWNER OVERRIDE 2 — THE FREE / NO-OBLIGATION ESTIMATE COPY IS CLEARED.
+ * Ryan, 2026-09-04: every string in this process flow describes the free,
+ * no-obligation estimate Ed's actually offers, cleared for BOTH pages. That
+ * moved "free estimate with no obligation to go ahead" out of the register's
+ * banned sales-conduct family and into Cleared (handoff §3, dated). Three
+ * strings that were flagged before the override are now legitimate. It does
+ * NOT extend past the estimate: there is deliberately no clean-up or
+ * haul-away step, because service-scope promises remain uncleared.
  *
  * REBUILT 2026-08-31 to a reference Ryan supplied: light ground with a faint
  * diagonal pattern, a two-tone display headline on the left against intro
@@ -56,14 +100,19 @@ import { CLIENT } from "@/components/websites/EdsTreeService/config/client.confi
  *     wait — that's why we answer calls 24/7". That is MUST NOT SHIP twice
  *     over: EBS has no emergency line (CLIENT.contact.emergencyPhoneDisplay
  *     is empty by design) and all 24-7 copy was stripped from this site on
- *     2026-08-27. Replaced with the free-estimate/no-obligation line, which
- *     IS cleared and is sourced from CLIENT.offers.items[0].
+ *     2026-08-27. Replaced with the free-estimate/no-obligation line.
+ *     ⚠️ CORRECTED 2026-09-04: this used to say the line was "sourced from
+ *     CLIENT.offers.items[0]". It is not, and cannot be — that array was
+ *     emptied on 2026-09-04 when the owner confirmed free estimates are the
+ *     only offer. The line is a literal here, and it is cleared by owner
+ *     override 2 above rather than by an offers record.
  *
  * ⚠️ PROP SHAPE CHANGED (root §13.3.4). The old `title` and `steps` props
- * are gone; the new surface is eyebrow / headlineAccent / headlineRest /
- * intro / steps / supportingLine / ctaHref / ctaLabel. Safe because
- * EBS-Contact is the ONLY consumer and passes none of them — it spreads
- * TRACKING and nothing else. tsc will catch any consumer added later.
+ * are gone; the surface is layout / eyebrow / headlineAccent / headlineRest
+ * / intro / steps / supportingLine / ctaHref / ctaLabel. `layout` was ADDED
+ * 2026-09-04 and defaults to "column", so the existing /contact mount is
+ * unchanged by its arrival. Every prop is optional; tsc catches any consumer
+ * that passes something the interface does not carry.
  */
 
 /* ── Icons ──────────────────────────────────────────────────────────────
@@ -71,11 +120,27 @@ import { CLIENT } from "@/components/websites/EdsTreeService/config/client.confi
    and the About page's capability cards so the whole site's iconography
    reads as one family.
 
-   TWO-TONE, like the reference. The svg root inherits brand-primary from
-   the tile; paths that should read navy carry their own text-default-font
-   class plus stroke="currentColor", which resolves against the PATH's own
-   colour rather than the root's. That is the whole trick, and it is why
-   these do not need fills, gradients or a second svg.
+   TWO-TONE, and it costs nothing. The svg root inherits its colour from the
+   tile; paths that should read as the accent carry their own
+   text-default-font class plus stroke="currentColor", which resolves against
+   the PATH's own colour rather than the root's. That is the whole trick, and
+   it is why these need no fills, gradients or second svg.
+
+   ⚠️ THE TWO LAYOUTS COLOUR THESE DIFFERENTLY, and the icons need no edit
+   for it. In `column` the tile is white and its text colour is
+   brand-primary, so the root strokes read green and the accent paths read
+   near-black — genuinely two-tone. In `row` the tile is AMBER and its text
+   colour is default-font, so root and accents resolve to the SAME near-black
+   and the icon reads single-tone at 6.48:1 on the amber. That is deliberate:
+   the only other tone available on an amber fill is brand-primary green,
+   which measures ~2.2:1 against it and would be worse than no contrast at
+   all. Do not add a third colour class to "restore" two-tone in row mode.
+
+   ── 2026-09-04: all five redrawn for a TREE SERVICE ──
+   The set used to be a generic contractor sequence inherited from a roofing
+   build — handset, clipboard, document, calendar, hard hat — which described
+   any trade and none. Every glyph below is specific to what actually happens
+   on a tree job, and each maps to exactly one step.
    ------------------------------------------------------------------- */
 
 const svgProps = {
@@ -88,7 +153,11 @@ const svgProps = {
   "aria-hidden": true,
 };
 
-/** Handset with signal arcs — reaching out, by phone or form. */
+/**
+ * Step 1 — handset with a message bubble. Both ways in: the phone line and
+ * the form. The bubble replaces the old signal arcs, which said "phone"
+ * twice and never said "or send us a request".
+ */
 function IconCall({ className }: { className?: string }) {
   return (
     <svg className={className} {...svgProps}>
@@ -96,41 +165,61 @@ function IconCall({ className }: { className?: string }) {
       <path
         className="text-default-font"
         stroke="currentColor"
-        d="M15.4 3.6a5.6 5.6 0 0 1 4.6 4.6M15 7.1a2.3 2.3 0 0 1 1.7 1.7"
+        d="M14.8 2.4h6.1a1.2 1.2 0 0 1 1.2 1.2v2.9a1.2 1.2 0 0 1-1.2 1.2h-3.1l-2.3 1.8V7.7h-.7a1.2 1.2 0 0 1-1.2-1.2V3.6a1.2 1.2 0 0 1 1.2-1.2Z"
       />
     </svg>
   );
 }
 
-/** Clipboard under a magnifier — the on-site inspection. */
-function IconInspection({ className }: { className?: string }) {
+/**
+ * Step 2 — a tree with a magnifier over it. The free on-site look. This is
+ * the glyph that most distinguishes a tree service from any other trade, so
+ * it is a real conifer with a trunk and a ground line, not a clipboard.
+ */
+function IconTreeLook({ className }: { className?: string }) {
   return (
     <svg className={className} {...svgProps}>
-      <path d="M8.4 4.3H6.6a1.6 1.6 0 0 0-1.6 1.6v12.5a1.6 1.6 0 0 0 1.6 1.6h5.1" />
-      <path d="M15.6 4.3h1.8A1.6 1.6 0 0 1 19 5.9v4.4" />
-      <rect x="8.4" y="2.7" width="7.2" height="3.2" rx="1" />
-      <circle className="text-default-font" stroke="currentColor" cx="16" cy="15.6" r="3.2" />
-      <path className="text-default-font" stroke="currentColor" d="m18.4 18 2.3 2.3" />
+      {/* ⚠️ The magnifier only GRAZES the canopy (its left edge lands at
+          x≈13.9, the lower tier ends at x=14). The first draft centred it
+          over the tree and the two shapes turned into one unreadable blob at
+          36px — verified on a 3x capture, not guessed. Keep them touching,
+          not overlapping. */}
+      <path d="M9.5 3 6.6 8h5.8Z" />
+      <path d="M9.5 7 5 13.6h9Z" />
+      <path d="M9.5 13.6v4M6 17.6h7" />
+      <circle className="text-default-font" stroke="currentColor" cx="17.2" cy="15.6" r="3.3" />
+      <path className="text-default-font" stroke="currentColor" d="m19.6 18 2.4 2.4" />
     </svg>
   );
 }
 
-/** Document with ruled lines and a price — the written estimate. */
+/**
+ * Step 3 — the estimate sheet, marked with a small tree so it reads as an
+ * estimate for THIS job rather than as a generic document icon.
+ */
 function IconEstimate({ className }: { className?: string }) {
   return (
     <svg className={className} {...svgProps}>
       <path d="M13.4 2.9H7a1.8 1.8 0 0 0-1.8 1.8v14.6A1.8 1.8 0 0 0 7 21.1h10a1.8 1.8 0 0 0 1.8-1.8V8.3Z" />
       <path d="M13.4 2.9v5.4h5.4" />
+      {/* ⚠️ ONE BIG TREE, NOT A SMALL ONE PLUS THREE RULED LINES. The first
+          draft drew a 3.4-wide conifer above three lines of "text"; at 36px
+          the tree read as an arrowhead and the whole glyph read as a generic
+          document. The canopy is now 5.4 wide with a single rule under it —
+          fewer marks, each one big enough to survive the size. */}
+      <path d="M12 10 9.3 14.2h5.4Z" />
+      <path d="M12 14.2v2" />
       <path
         className="text-default-font"
         stroke="currentColor"
-        d="M8.6 12.6h3.1M8.6 15.6h6.8M8.6 18.1h4.6"
+        d="M8.6 18.6h6.8"
       />
     </svg>
   );
 }
 
-/** Calendar with a confirmed date — scheduling and materials. */
+/** Step 4 — calendar with a confirmed date. The one glyph that carried over
+ *  unchanged: booking a date looks the same in every trade. */
 function IconSchedule({ className }: { className?: string }) {
   return (
     <svg className={className} {...svgProps}>
@@ -145,17 +234,38 @@ function IconSchedule({ className }: { className?: string }) {
   );
 }
 
-/** Hard hat over shoulders — the crew on site, and the clean-up. */
-function IconInstall({ className }: { className?: string }) {
+/**
+ * Step 5 — a hard hat: the crew on site.
+ *
+ * ⚠️ DO NOT REPLACE THIS WITH A CHAINSAW. It was tried THREE times on
+ * 2026-09-04, verified each time on a 3x capture of the live disc, and it
+ * never read at the 36px this icon is actually drawn at:
+ *   1. Motor body + a semicircular top handle → an unmistakable PADLOCK.
+ *   2. Arch removed, teeth along the top of a long bar → a KEY. A bow-ish
+ *      body plus a toothed shaft IS the key silhouette.
+ *   3. Chunkier body, thinner bar, teeth pointing DOWN → still a key. The
+ *      body/bar proportion is what carries the read, and at this size there
+ *      is not enough room to make a motor housing look like a motor housing.
+ * A chainsaw needs roughly 48px before its silhouette separates from a key.
+ * None of this is visible in the markup, in a class name, or in any computed
+ * style — only in a capture, which is why the failures kept surviving into
+ * "it looks fine" until the discs were actually zoomed.
+ *
+ * The hard hat is the other glyph Ryan named for this step. It is generic
+ * across trades, which was the original objection to it — but the step's own
+ * label is "Our own crew does the work", the surrounding set is already
+ * strongly tree-specific (tree-and-magnifier, tree-marked estimate), and an
+ * icon that reads wrong is worse than one that reads plainly.
+ */
+function IconCrew({ className }: { className?: string }) {
   return (
     <svg className={className} {...svgProps}>
-      <path d="M4.4 12.6a7.6 7.6 0 0 1 15.2 0" />
-      <path d="M3.4 12.6h17.2a.9.9 0 0 1 .9.9v1a.9.9 0 0 1-.9.9H3.4a.9.9 0 0 1-.9-.9v-1a.9.9 0 0 1 .9-.9Z" />
-      <path d="M10.2 5.6a7.6 7.6 0 0 1 3.6 0M12 5.3v7.3" />
+      <path d="M4.8 13.8a7.2 7.2 0 0 1 14.4 0" />
+      <path d="M2.6 13.8h18.8a1.1 1.1 0 0 1 1.1 1.1v1.3a1.1 1.1 0 0 1-1.1 1.1H2.6a1.1 1.1 0 0 1-1.1-1.1v-1.3a1.1 1.1 0 0 1 1.1-1.1Z" />
       <path
         className="text-default-font"
         stroke="currentColor"
-        d="M5.9 21.3a6.6 6.6 0 0 1 12.2 0"
+        d="M12 6.7v7.1M8.9 7.6a7.2 7.2 0 0 0-1.1 6.2M15.1 7.6a7.2 7.2 0 0 1 1.1 6.2"
       />
     </svg>
   );
@@ -167,13 +277,25 @@ export interface ProcessStep {
 }
 
 /**
- * EBS's actual sequence, written from what the CLAIMS REGISTER clears:
- * free estimates with no charge and no obligation, a written estimate, and
- * EBS's own crews doing the work.
+ * Ed's actual sequence, rewritten for a tree service 2026-09-04 and SHARED
+ * by both layouts — the home row and the /contact column show the identical
+ * five steps, by request. One process, one description of it.
+ *
+ * Each label maps to a cleared claim: free estimates (register, Cleared),
+ * the free/no-obligation estimate (owner override 2, header), and "our own
+ * crews, start to finish" (register, Cleared).
+ *
+ * ⚠️ THERE IS NO CLEAN-UP OR HAUL-AWAY STEP, and that is deliberate rather
+ * than an oversight. A sixth "we clear the yard" step is the obvious thing
+ * to add to a tree-service process and it is exactly what the register bans:
+ * "cleanup included" / "we leave your yard cleaner than we found it" are
+ * uncleared service-scope promises. Owner override 2 cleared the ESTIMATE
+ * copy, not the scope of the work. Do not add it without an owner answer.
  *
  * ⚠️ Step 4 is scheduling, NOT the reference's insurance-claim step — see
- * the CLAIMS note in the header. Do not "restore" it to match the reference
- * without confirming EBS actually handles claims.
+ * the CLAIMS note in the header. Insurance-claim help after storms is an
+ * UNVERIFIED CAPABILITY for Ed's too, and sits next to the banned emergency
+ * language, so it is doubly not a step to invent.
  */
 /* ⚠️ THE WIDTH OF THIS WHOLE SECTION, in one place.
 
@@ -193,17 +315,35 @@ export interface ProcessStep {
    ⚠️ RE-MEASURE THIS when the form's real width is settled. 560 is derived
    from a marked-up screenshot, not from the built form. */
 const PROCESS_MEASURE = "w-full max-w-[560px]";
+
+/* ⚠️ COLUMN LAYOUT ONLY. PROCESS_MEASURE above exists because a contact form
+   occupies the right half of /contact; the `row` layout has no form beside
+   it and uses the full container instead. `measure` in the component body is
+   what picks between them — never hardcode PROCESS_MEASURE into the JSX
+   again, or the row layout silently collapses to a 560px strip on a 1280px
+   container and simply looks like a mistake. */
 const DEFAULT_STEPS: readonly ProcessStep[] = [
-  { label: "Call or send a request", icon: <IconCall /> },
-  { label: "Free on-site look at the job", icon: <IconInspection /> },
-  { label: "Written estimate with options", icon: <IconEstimate /> },
-  { label: "Date confirmed", icon: <IconSchedule /> },
-  { label: "The work, done by our own crew", icon: <IconInstall /> },
+  { label: "Tell us about the tree", icon: <IconCall /> },
+  { label: "Free on-site look", icon: <IconTreeLook /> },
+  { label: "You get the estimate", icon: <IconEstimate /> },
+  { label: "We set the date", icon: <IconSchedule /> },
+  { label: "Our own crew does the work", icon: <IconCrew /> },
 ];
 
 export interface OurProcessStepsWrapperProps {
   id?: string;
   className?: string;
+
+  /**
+   * `column` (default) — everything inside PROCESS_MEASURE, steps 2-up, left
+   * aligned, on the page-background ground. This is /contact, where a sticky
+   * contact form owns the right half of the section.
+   *
+   * `row` — full container width, headline left / intro right, five steps
+   * across one connector rail, centred supporting line and CTA, white ground.
+   * This is the home page.
+   */
+  layout?: "column" | "row";
 
   /** Content */
   eyebrow?: string;
@@ -225,18 +365,114 @@ export interface OurProcessStepsWrapperProps {
   trackingPageType?: string;
 }
 
+/* ── The two step shapes ────────────────────────────────────────────────
+   Two sub-components rather than one <li> full of `isRow ?` ternaries. The
+   column card and the row node share almost nothing structurally — one is a
+   left-aligned card with a tile overlapping its corner, the other is a
+   centred node sitting on a rail — so a single element trying to be both
+   would carry a conditional on nearly every class. Single-use, so they live
+   in this file (root §6.4).
+   -------------------------------------------------------------------- */
+
+/** `column` — the /contact card, with the icon tile overlapping its corner. */
+function StepCard({ step, index }: { step: ProcessStep; index: number }) {
+  return (
+    <li className="relative pl-3 pt-8">
+      {/* The card. pt-14 clears the tile overlapping its top-left corner;
+          h-full equalises the row when labels wrap to different line
+          counts. */}
+      <div className="flex h-full flex-col rounded-sm bg-white/75 px-5 pb-6 pt-14 shadow-[0_1px_2px_rgba(11,36,14,0.05)]">
+        <p className="flex items-start gap-2 text-sm font-semibold uppercase leading-snug tracking-[0.02em] text-default-font">
+          <span className="text-brand-primary">{index + 1}</span>
+          <span>{step.label}</span>
+        </p>
+      </div>
+
+      {/* Icon tile. It sits AFTER the card in source order so it paints on
+          top without needing a z-index. White tile + brand-primary root =
+          the two-tone icon described in the Icons block. */}
+      <span className="absolute left-0 top-0 flex h-[72px] w-[72px] items-center justify-center rounded-sm bg-white text-brand-primary shadow-[0_4px_14px_rgba(11,36,14,0.14)]">
+        {React.cloneElement(
+          step.icon as React.ReactElement<{ className?: string }>,
+          { className: "h-9 w-9" }
+        )}
+      </span>
+    </li>
+  );
+}
+
+/**
+ * `row` — the home page node: an amber disc on the connector rail, wearing a
+ * numbered badge, with the label centred beneath it.
+ *
+ * The amber fill is owner override 1 (file header). It carries the icon in
+ * --color-default-font at 6.48:1, which is the style guide's own
+ * body-on-secondary pairing and passes AA — the amber is doing its work as a
+ * FILL here, not as type.
+ *
+ * ⚠️ The disc must stay OPAQUE and z-10. The rail is drawn as one straight
+ * line across the whole row and is hidden behind the discs; make the disc
+ * translucent and the line reappears straight through every icon.
+ */
+function StepNode({ step, index }: { step: ProcessStep; index: number }) {
+  return (
+    <li className="relative flex flex-col items-center text-center">
+      <span className="relative z-10 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-brand-secondary text-default-font shadow-[0_4px_14px_rgba(11,36,14,0.18)]">
+        {React.cloneElement(
+          step.icon as React.ReactElement<{ className?: string }>,
+          { className: "h-9 w-9" }
+        )}
+        {/* Number badge. ring-2 ring-white cuts a gap out of the amber disc
+            so the two circles read as separate objects rather than as one
+            dented shape. White on the near-black ground is 15.34:1. */}
+        <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-default-font)] text-[11px] font-bold text-white ring-2 ring-white">
+          {index + 1}
+        </span>
+      </span>
+
+      {/* max-w caps the label so a three-word step wraps to two tidy lines
+          instead of stretching to the full column and pulling the row's
+          rhythm apart. */}
+      <p className="mt-5 max-w-[190px] text-sm font-semibold uppercase leading-snug tracking-[0.02em] text-default-font">
+        {step.label}
+      </p>
+    </li>
+  );
+}
+
 export default function OurProcessStepsWrapper({
   id,
   className,
+  layout = "column",
   eyebrow = "HOW IT WORKS",
   headlineAccent = `${CLIENT.vocabulary.tradeName} made`,
-  headlineRest = "simple, clear, and honest",
-  intro = `Choosing a tree crew should not feel overwhelming. Our process keeps you informed at every step — from the first look at the tree through to the final clean-up. Whether it is one limb or a whole lot, you get clear pricing and an honest plan.`,
+  /*
+    REWRITTEN 2026-09-04. Was "simple, clear, and honest": "clear" and
+    "honest" are sales-conduct adjectives the register does not clear, and
+    owner override 2 covers the free/no-obligation ESTIMATE, not Ed's
+    character. This version says the same thing about the process itself.
+  */
+  headlineRest = "simple, from first call to finished job",
+  /*
+    REWRITTEN 2026-09-04. The previous intro carried three problems at once:
+    "keeps you informed at every step" (the register's own tell for an
+    invented absolute), "clear pricing and an honest plan" (the banned
+    upfront-pricing / no-pressure family), and "through to the final
+    clean-up" — a service-scope promise that owner override 2 does NOT
+    cover, since the override is about the estimate. What is left is the
+    three things that actually happen, all inside the override.
+  */
+  intro = `Choosing a tree crew should not feel overwhelming. You tell us about the tree, we come out and look at it, and you get an estimate — free, with no obligation to go ahead.`,
   steps = DEFAULT_STEPS,
   /*
     Replaces the reference's "we answer calls 24/7" line, which is MUST NOT
-    SHIP twice over. Sourced from CLIENT.offers.items[0].description, which
-    is the cleared wording: "No charge to come out and no obligation."
+    SHIP twice over. ⚠️ CORRECTED 2026-09-04: this comment used to say the
+    wording was sourced from CLIENT.offers.items[0].description. That array
+    is empty — free estimates are the only offer Ed's makes, and they are
+    carried in copy, not in an offers record. The line is cleared by owner
+    override 2 (see the file header), which is what makes "no obligation"
+    legitimate here when the register's sales-conduct row would otherwise
+    ban it.
   */
   supportingLine = "The estimate is free — no charge to come out, and no obligation to go ahead.",
   /*
@@ -267,6 +503,20 @@ export default function OurProcessStepsWrapper({
     "data-page-type": trackingPageType,
   } as const;
 
+  const isRow = layout === "row";
+
+  /*
+    ⚠️ WHY THE ROW GROUND IS WHITE AND NOT THE PAGE BACKGROUND.
+    Positional, so re-derive it if this section ever moves. On the home page
+    it sits between AboutUsVariant2 — --color-default-font at md+, i.e. the
+    dark chevron band — and ServicesGridSectionWrapper on
+    --color-ground-concrete (#E7F5E9). White gives a hard edge against the
+    dark band above and a real step down to the concrete below.
+    --color-default-background (#EDFAEF) is ONE STEP off that concrete and
+    would produce no visible seam with the grid at all: the two sections
+    would read as one very long band. /contact keeps the page background
+    because its neighbours there are different.
+  */
   return (
     <section
       id={id}
@@ -276,7 +526,7 @@ export default function OurProcessStepsWrapper({
         // band rather than widening the document (this site already has a
         // known 768-1024px overflow — do not add to it).
         "relative isolate w-full overflow-hidden",
-        "bg-[var(--color-default-background)]",
+        isRow ? "bg-white" : "bg-[var(--color-default-background)]",
         className,
       ]
         .filter(Boolean)
@@ -290,125 +540,211 @@ export default function OurProcessStepsWrapper({
       {/* Two faint diagonal bands, echoing the reference's chevron ground.
           Drawn with a skew rather than an image or an SVG data URI: it is
           two divs and a transform, costs no request, and the angle is
-          legible in the markup. Both are decorative and inert. */}
+          legible in the markup. Both are decorative and inert.
+
+          ⚠️ THE FILL HAS TO FOLLOW THE GROUND. In `column` these are white
+          over the page background, which is what makes them visible. On the
+          row layout's WHITE ground, white-on-white is nothing at all — the
+          bands would still be in the DOM, still cost the same, and paint
+          absolutely nothing. Row uses a very low-alpha amber instead (owner
+          override 1), which reads as the same diagonal motif on white.
+
+          ⚠️ A GROUND SWAP WITH ServiceGuaranteeAndFeaturesWrapper WAS TRIED
+          AND REVERTED on 2026-09-04, at Ryan's request, the same day. The
+          experiment moved this warm tint out to that section as a new
+          `--color-ground-amber` token and left this one plain white. Both
+          halves are undone: these wedges are amber again in row mode, that
+          section is `bg-white` again, and the token is gone. Do not
+          reintroduce it as a tidy-up. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-[15%] top-0 h-full w-[45%] -skew-x-[18deg] bg-white/70"
+        className={[
+          "pointer-events-none absolute -left-[15%] top-0 h-full w-[45%] -skew-x-[18deg]",
+          isRow ? "bg-brand-secondary/[0.07]" : "bg-white/70",
+        ].join(" ")}
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-[20%] top-0 h-full w-[50%] -skew-x-[18deg] bg-white/45"
+        className={[
+          "pointer-events-none absolute -right-[20%] top-0 h-full w-[50%] -skew-x-[18deg]",
+          isRow ? "bg-brand-secondary/[0.04]" : "bg-white/45",
+        ].join(" ")}
       />
 
       {/* `relative` lifts the content above the two absolute bands. */}
       <div className="relative mx-auto w-full max-w-[1280px] px-6 py-16 md:px-10 md:py-24">
-        {/* Header. WAS headline-left / intro-right, matching the reference.
-            COLLAPSED to a single left column 2026-09-02: the right half of
-            this section is being given over to a contact form, and the intro
-            paragraph sat exactly where that form goes. Everything in this
-            section now lives inside PROCESS_MEASURE.
+        {/* Header. Headline-left / intro-right in `row` — the shape the
+            reference had and the shape this section was built with.
 
-            ⚠️ Keep this a single column while the form occupies the right
-            side. Restoring md:flex-row would put the prose back underneath
-            the form — which does not error, does not overflow, and is only
-            visible by looking. */}
-        <div className="flex flex-col gap-8">
-          <div className={PROCESS_MEASURE}>
+            ⚠️ COLUMN MUST STAY A SINGLE COLUMN. It was collapsed on
+            2026-09-02 because /contact gives the right half of this section
+            to a sticky contact form, and the intro paragraph sat exactly
+            where that form goes. Restoring md:flex-row there would put the
+            prose back UNDERNEATH the form — which does not error, does not
+            overflow, and is only visible by looking at the page. That is
+            why the direction is bound to `isRow` and not to a breakpoint. */}
+        {/* ⚠️ The split is lg, NOT md, and that was measured rather than
+            chosen. At md the headline gets 55% of (768 − 48) = 396px and the
+            44px display face breaks "…FROM FIRST CALL TO FINISHED JOB" over
+            four lines against a three-line intro — top-heavy and lopsided.
+            At lg the same column is ~519px and the pair balances. Between
+            768 and 1024 the header simply stacks, which is what the 44px
+            type actually has room for. */}
+        <div
+          className={
+            isRow
+              ? "flex flex-col gap-8 lg:flex-row lg:items-end lg:gap-14"
+              : "flex flex-col gap-8"
+          }
+        >
+          <div className={isRow ? "lg:w-[55%]" : PROCESS_MEASURE}>
+            {/*
+              ⚠️ AMBER EYEBROW — OWNER OVERRIDE 1 (file header), 2026-09-04.
+              --color-brand-secondary measures 2.55:1 on the row layout's
+              white and 2.37:1 on the column layout's page background. Both
+              miss WCAG AA for text at every size. Ryan asked for the amber
+              rule to be bypassed in this section and this is the one element
+              where amber is literally the text colour rather than a fill.
+              Recorded, not silently "fixed": the compliant version is
+              text-[var(--color-brand-secondary-text)], which on this client
+              resolves to primary green at 5.07:1.
+            */}
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-secondary md:text-base">
               {eyebrow}
             </p>
             {/*
-              Two-tone display headline. The accent half is
-              --color-brand-secondary-text (#8D6917), NOT --color-brand-secondary.
-              This is that token's FIRST consumer — global.css has carried it
-              since the theme was written, for exactly this case, with no
-              user. The reason it has to be used here: brand-secondary gold
-              measures 2.15:1 on a near-white ground and fails WCAG's 3:1
-              even at large-bold sizes, so the site's own display gold cannot
-              legally carry a headline. brand-secondary-text is the darkened
-              companion and measures ~4.7:1.
+              Display headline. The accent half is
+              --color-brand-secondary-text, which on Ed's resolves to PRIMARY
+              GREEN (5.07:1 on the page background, 5.45:1 on white), not to
+              the darkened gold it held on the previous client. Deliberately
+              left green under override 1: at 44px on white, amber's 2.55:1
+              would read as washed-out rather than as an accent, so the
+              override buys nothing here. The amber does its work below, as
+              the rail, the discs and the CTA — where it is a fill carrying
+              dark labels at 6.48:1.
             */}
             <h2 className="mt-4 font-heading-1 text-3xl font-bold uppercase leading-[1.1] tracking-[-0.01em] text-default-font md:text-[2.75rem]">
-              <span className="italic text-[var(--color-brand-secondary-text)]">
+              {/* ⚠️ pr-[0.12em] is NOT decorative spacing. The word space
+                  after this span is really there in the DOM (verified), but
+                  the italic's overhang leans the last glyph into it and at
+                  44px "…MADE simple" renders as "MADEsimple". The padding
+                  gives the slant somewhere to go. Ems, not px, so it scales
+                  with the heading's own breakpoint change. */}
+              <span className="italic pr-[0.12em] text-[var(--color-brand-secondary-text)]">
                 {headlineAccent}
               </span>{" "}
               {headlineRest}
             </h2>
           </div>
 
-          {/* No md:pt-10 any more — that existed to drop the prose down beside
-              a three-line headline. Stacked underneath, it would just be a
-              stray 40px gap on top of the parent's gap-8. */}
-          <div className={PROCESS_MEASURE}>
+          {/* md:items-end on the parent sits this beside the headline's last
+              line in row mode. In column mode there is no md:pt-10 — that
+              existed to drop the prose down beside a three-line headline;
+              stacked underneath, it would just be a stray 40px gap on top of
+              the parent's gap-8. */}
+          <div className={isRow ? "md:w-[45%]" : PROCESS_MEASURE}>
             <p className="text-base leading-relaxed text-neutral-600 md:text-lg">
               {intro}
             </p>
           </div>
         </div>
 
-        {/* Steps. TWO PER ROW at every tier from sm up, by request
-            (2026-09-02) — previously 1 / 2 / 3 / 5 across, which put all five
-            on one line at lg and made each card a 150px column of wrapped
-            two-word labels. Five over two columns runs 2 / 2 / 1, so the last
+        {/* Steps.
+
+            COLUMN — two per row at every tier from sm up, by request
+            (2026-09-02). Five over two columns runs 2 / 2 / 1, so the last
             row is deliberately half-empty; that reads as a list that ended
-            rather than as a broken grid, which a ragged 5-across tier did not.
+            rather than as a broken grid, which a ragged 5-across tier did
+            not. PROCESS_MEASURE is what makes it LEFT-ALIGNED rather than
+            merely two-column: without the cap, two columns across the 1280px
+            container give ~620px cards carrying four words each and the
+            section reads as two enormous empty boxes.
 
-            ⚠️ max-w-[760px] + mr-auto is what makes this LEFT-ALIGNED rather
-            than merely two-column. Without the cap, two columns across the
-            1280px container give ~620px cards carrying four words each, and
-            the section reads as two enormous empty boxes. The cap sets the
-            card width; mr-auto is what pins the block left instead of letting
-            the grid centre itself in the container.
+            ROW — five across at lg on one connector rail. This is the layout
+            the earlier note called "a ragged 5-across tier", and it is only
+            workable now because the step shape changed with it: a 221px
+            column is far too narrow for a card with a corner-mounted tile,
+            but it is comfortable for a centred disc with a two-line label
+            under it (see StepNode). Below lg it steps down to 2-up and then
+            1-up and the rail is hidden, because a rail through a wrapped
+            grid connects the wrong pairs. */}
+        <ol
+          className={
+            isRow
+              ? "relative mt-16 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-5"
+              : `mt-14 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 ${PROCESS_MEASURE}`
+          }
+        >
+          {/* The connector rail, lg and up only.
 
-            The supporting line and the CTA below moved left in the same pass.
-            They were centred against a full-width grid; leaving them centred
-            under a left-aligned block would read as a mistake rather than as a
-            choice. */}
-        <ol className={`mt-14 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 ${PROCESS_MEASURE}`}>
-          {steps.map((step, i) => (
-            <li key={step.label} className="relative pl-3 pt-8">
-              {/* The card. pt-14 clears the tile overlapping its top-left
-                  corner; h-full equalises the row when labels wrap to
-                  different line counts. */}
-              <div className="flex h-full flex-col rounded-sm bg-white/75 px-5 pb-6 pt-14 shadow-[0_1px_2px_rgba(23,41,58,0.04)]">
-                <p className="flex items-start gap-2 text-sm font-semibold uppercase leading-snug tracking-[0.02em] text-default-font">
-                  <span className="text-brand-primary">{i + 1}</span>
-                  <span>{step.label}</span>
-                </p>
-              </div>
+              ⚠️ left-[10%] / right-[10%] is not a guess and is not padding:
+              with five equal columns each is 20% wide, so 10% is exactly the
+              CENTRE of the first and of the last. The rail therefore starts
+              and stops under the end discs instead of running out to the
+              container edges. top-9 is half of the 72px disc, so it crosses
+              their centres. Change the column count and both numbers have to
+              change with it. */}
+          {isRow && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-[10%] right-[10%] top-9 hidden border-t-2 border-dashed border-brand-secondary/70 lg:block"
+            />
+          )}
 
-              {/* Icon tile, overlapping the card's top-left corner exactly as
-                  the reference does. It sits AFTER the card in source order
-                  so it paints on top without needing a z-index. */}
-              <span className="absolute left-0 top-0 flex h-[72px] w-[72px] items-center justify-center rounded-sm bg-white text-brand-primary shadow-[0_4px_14px_rgba(23,41,58,0.13)]">
-                {React.cloneElement(
-                  step.icon as React.ReactElement<{ className?: string }>,
-                  { className: "h-9 w-9" }
-                )}
-              </span>
-            </li>
-          ))}
+          {steps.map((step, i) =>
+            isRow ? (
+              <StepNode key={step.label} step={step} index={i} />
+            ) : (
+              <StepCard key={step.label} step={step} index={i} />
+            )
+          )}
         </ol>
 
-        <p className={`mt-14 text-left text-base leading-relaxed text-neutral-600 ${PROCESS_MEASURE}`}>
+        {/* Column keeps this left, under a left-aligned grid — centring it
+            there would read as a mistake rather than as a choice. Row centres
+            it under a full-width grid, for the same reason in reverse. */}
+        <p
+          className={[
+            "mt-14 text-base leading-relaxed text-neutral-600",
+            isRow
+              ? "mx-auto max-w-[680px] text-center"
+              : `text-left ${PROCESS_MEASURE}`,
+          ].join(" ")}
+        >
           {supportingLine}
         </p>
 
         {/*
-          Navy rather than brand-primary. This label is 16px semibold, which
-          is NOT large text under WCAG, so white on #1685CC (3.99:1) would
-          fail AA; on navy it is 14.84:1. Same reasoning as the services
-          grid's CTA tile and the About page's capability section.
+          CTA. Column keeps the near-black fill with a white label (15.34:1)
+          that /contact has shipped since 2026-08-31 — not changed here,
+          because this pass was asked to change the STEPS on that page, not
+          its button.
+
+          Row takes the amber fill with a --color-default-font label, which
+          is 6.48:1 and passes AA. That is the style guide's own canonical
+          CTA treatment (the same pairing as the navbar's), and it is what
+          owner override 1 is for. ⚠️ The label must NOT go white on amber:
+          that is 2.55:1, and it is the specific mistake the guide's rule 2
+          exists to prevent.
+
+          The focus ring has to move with the fill. An amber ring on an amber
+          button is invisible, so row rings in --color-default-font.
         */}
-        <div className="mt-8 flex justify-start">
+        <div className={["mt-8 flex", isRow ? "justify-center" : "justify-start"].join(" ")}>
           <a
             href={ctaHref}
             className={[
               "inline-flex items-center gap-2 rounded-md px-8 py-4",
-              "bg-[var(--color-default-font)] text-base font-semibold text-white",
+              "text-base font-semibold",
+              isRow
+                ? "bg-brand-secondary text-default-font hover:bg-brand-secondary-hover"
+                : "bg-[var(--color-default-font)] text-white",
               "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-secondary",
-              "focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-default-background)",
+              "focus-visible:outline-none focus-visible:ring-2",
+              isRow
+                ? "focus-visible:ring-[var(--color-default-font)] focus-visible:ring-offset-white"
+                : "focus-visible:ring-brand-secondary focus-visible:ring-offset-(--color-default-background)",
+              "focus-visible:ring-offset-2",
             ].join(" ")}
             data-event="click_cta"
             data-label="our-process-cta-free-estimate"

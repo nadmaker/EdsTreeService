@@ -60,26 +60,40 @@ import {
  * previous client's tree photography under EBS filenames. Shipping it
  * risked putting a rival's photo behind EBS's own service list.
  *
- * SURFACE — cast concrete + course lines, added 2026-08-31.
+ * SURFACE — FLAT GREEN, no texture (2026-09-04, by request).
  *
- * The section previously read on flat `bg-white`, which satisfied the
- * seam requirement below but gave it no surface at all: white cards on a
- * white ground, nothing lifting, and a services list with less visual
- * weight than the navy CTA tile sitting inside it.
+ * This band is `--color-ground-concrete` (#E7F5E9) and nothing else. The
+ * ground COLOUR is unchanged; what was removed is the five-layer stack
+ * that used to sit on top of it.
  *
- * It now renders a troweled-plaster ground with set-out lines at the
- * rhythm of lap siding and shingle courses, capped by a 3px gold rule.
- * Every layer is PROCEDURAL — feTurbulence from a data URI — so the
- * no-photograph constraint above is satisfied structurally rather than by
- * restraint: there is no image file that could turn out to be someone
- * else's. Roughly 1.1 KB of CSS, zero network requests, and the section
- * still ships no JavaScript. Tokens and full rationale are in global.css
- * under body.theme-ebs.
+ * HISTORY, because this surface has now been through three states and the
+ * middle one left tokens behind that are still referenced elsewhere:
  *
- * ⚠️ The lines run at ALL widths, which was a deliberate choice and not an
- * oversight. If they ever start reading as a table on narrow screens, the
- * fix is a `max-md:hidden` on the course-lines layer div — not a change
- * to the spacing, which is tied to the siding rhythm.
+ * Until 2026-08-31 it was flat `bg-white` — which met the seam
+ * requirement below but gave the section no surface at all: white cards on
+ * a white ground, nothing lifting.
+ *
+ * From 2026-08-31 it carried a procedural troweled-plaster ground — cloud,
+ * vein and grain turbulence layers under set-out lines and a daylight
+ * rake, five absolutely-positioned divs reading feTurbulence data URIs out
+ * of global.css. It cost no network requests and no JavaScript; it was
+ * removed because the flat colour was wanted, not because it was
+ * expensive.
+ *
+ * ⚠️ NOTHING WAS DELETED OUTSIDE THIS FILE, deliberately. The five
+ * --site-tex-* / --site-course-lines / --site-ground-rake tokens in
+ * global.css and the ConcreteGround component still have live consumers on
+ * /about and elsewhere — this section was simply the last one that also
+ * held an INLINE copy of the stack. Do not tidy those tokens away on the
+ * strength of this section no longer using them; grep for consumers first.
+ * Re-adding texture here is `<ConcreteGround />` plus restoring
+ * `relative isolate overflow-hidden` on the root and `relative` on the
+ * content div — see that file's usage note. Do not paste the inline stack
+ * back; the shared component is the current home of the technique.
+ *
+ * The 3px gold top rule is KEPT. It is not texture — it is the drawn seam
+ * described below, and it is doing more work now that the ground either
+ * side of it differs by less.
  *
  * SEAM — why this band has to differ from its neighbours at all.
  * This section was moved beneath the hero on 2026-08-27 (it and the
@@ -227,12 +241,18 @@ export default function ServicesGridSectionWrapper({
     <section
       id={id}
       className={[
-        // `isolate` is load-bearing, not decoration: the three multiply
-        // layers below blend with their BACKDROP, and without a stacking
-        // context of its own that backdrop is whatever the page painted
-        // beneath this section. `overflow-hidden` keeps the tiles clipped
-        // to the band.
-        "relative isolate w-full overflow-hidden",
+        // FLAT GROUND, no layers over it (2026-09-04, by request). The
+        // `relative isolate overflow-hidden` trio that stood here existed
+        // ONLY for the texture stack — `isolate` to stop the multiply
+        // layers blending onto the neighbour's surface, `overflow-hidden`
+        // to clip the tiles, `relative` to give the content something to
+        // sit above. With no absolutely-positioned children left in this
+        // section, all three were dead weight and were removed with the
+        // layers. Restore all three together if any texture comes back.
+        "w-full",
+        // The ground colour is UNCHANGED — #E7F5E9, one step below
+        // --color-default-background. Removing the texture removed what
+        // sat ON this green, not the green.
         "bg-[var(--color-ground-concrete)]",
         // The seam, drawn rather than implied. See the SURFACE note above.
         "border-t-[3px] border-t-brand-secondary",
@@ -246,49 +266,7 @@ export default function ServicesGridSectionWrapper({
       data-service={trackingService}
       data-page-type={trackingPageType}
     >
-      {/* ── Ground ─────────────────────────────────────────────────────
-          Four stacked layers over --color-ground-concrete. The data URIs
-          and gradients live in global.css under body.theme-ebs, which is
-          also where the full rationale sits; opacity and tile size stay
-          here so the texture is tunable against the live page without
-          anyone editing a data URI.
-
-          All four are decorative: aria-hidden, pointer-events-none, and
-          they sit behind the content div, which takes `relative` for that
-          reason. Order is bottom-to-top — grain over vein over cloud, then
-          the lines, then the light.
-
-          These are DIVS rather than pseudo-elements because there are four
-          of them and an element only has ::before and ::after. Merging
-          them would mean baking the opacities into the SVGs and losing the
-          dials.
-          ─────────────────────────────────────────────────────────────── */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-cloud)] bg-[length:640px] opacity-[0.30] mix-blend-multiply"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-vein)] bg-[length:900px] opacity-[0.14] mix-blend-multiply"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-grain)] bg-[length:140px] opacity-[0.08] mix-blend-multiply"
-      />
-      {/* Set-out lines, then the daylight rake ON TOP of them — the light
-          is what stops the lines reading as a hard drafting grid at the
-          top right. Reversing these two flattens the effect. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[image:var(--site-course-lines)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[image:var(--site-ground-rake)]"
-      />
-
-      {/* `relative` lifts the content above the four absolute layers. */}
-      <div className="relative mx-auto w-full max-w-[1280px] px-6 py-20 md:px-10 md:py-28">
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-20 md:px-10 md:py-28">
         {/* Header — same eyebrow → title → caption rhythm as the hero and
             the stats band, so the three read as one system. */}
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-secondary md:text-base">

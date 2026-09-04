@@ -120,6 +120,31 @@ export interface PortfolioGalleryWrapperProps {
   id?: string;
   className?: string;
 
+  /**
+   * The section's ground treatment. ADDED 2026-09-04 so the home page can
+   * match ServiceGuaranteeAndFeaturesWrapper without changing /contact, where
+   * this wrapper is also mounted.
+   *
+   *   "page"  (default) — --color-default-background, no texture. /contact.
+   *   "paper" — bg-white plus the folded-paper crease sheet and grain, the
+   *             same treatment the map section wears. Home.
+   *
+   * ⚠️ ONE PROP CARRYING BOTH THE COLOUR AND THE TEXTURE, and NOT a
+   * `className` override. Two reasons, and both have bitten elsewhere:
+   *   · The root merges `[defaults, className]`, so a background passed
+   *     through `className` leaves BOTH bg-* utilities in the attribute and
+   *     the winner is whichever Tailwind emits later in the stylesheet, not
+   *     the one written last — same property, same specificity, no guarantee.
+   *     (The `md:pb-14` the home page passes through `className` is safe for
+   *     a different reason: `pb-*` and `py-*` are different utilities whose
+   *     sort order is stable and was verified in the built CSS.)
+   *   · The colour and the texture are not independent. The crease layers are
+   *     mix-blend-multiply and need `relative isolate` on this root; the
+   *     ground supplies their hue. Splitting them across two props makes it
+   *     possible to set one without the other and get a silently wrong band.
+   */
+  surface?: "page" | "paper";
+
   /** Content */
   titleLeadIn?: string;
   titleEmphasis?: string;
@@ -149,6 +174,7 @@ export interface PortfolioGalleryWrapperProps {
 export default function PortfolioGalleryWrapper({
   id,
   className,
+  surface = "page",
   titleLeadIn = "See our tree work across",
   titleEmphasis = CLIENT.geo.serviceArea,
   subtitle,
@@ -309,10 +335,22 @@ export default function PortfolioGalleryWrapper({
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
   ].join(" ");
 
+  const isPaper = surface === "paper";
+
   return (
     <section
       id={id}
-      className={["w-full bg-default-background py-20 md:py-28", className]
+      className={[
+        "w-full",
+        // `relative isolate` is not decoration in the paper case — it is what
+        // the texture layers below need. They are mix-blend-multiply, so they
+        // blend with their BACKDROP; without a stacking context of its own
+        // that backdrop is whatever the page painted underneath this section.
+        // Same reasoning as ServiceGuaranteeAndFeaturesWrapper's root.
+        isPaper ? "relative isolate bg-white" : "bg-default-background",
+        "py-20 md:py-28",
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
       data-track-view
@@ -321,17 +359,61 @@ export default function PortfolioGalleryWrapper({
       data-service={trackingService}
       data-page-type={trackingPageType}
     >
+      {/* ── FOLDED-PAPER GROUND (paper surface only) ────────────────────────
+          The same technique ServiceGuaranteeAndFeaturesWrapper wears: one
+          stretched sheet plus grain, both mix-blend-multiply so the black
+          fills take their hue from the ground beneath and nothing is frozen
+          for a fork. The grain is technical rather than decorative — these
+          are very large, very shallow gradients, which 8-bit displays render
+          as visible banding without it.
+
+          ⚠️ --site-tex-creases-ALT, DELIBERATELY NOT --site-tex-creases.
+          global.css carries three crease arrangements for one stated reason:
+          "two sections wearing the identical sheet read as a repeated asset."
+          On the home page the map section wears `creases` and sits DIRECTLY
+          BELOW this one with no seam between them (both bg-white), and the
+          /about-and-now-home FAQ wears `creases-faq`. `creases-alt` is the
+          one arrangement unused on this page, and it is only free here
+          because TallServicesBenefitsCards — its other consumer — is mounted
+          on the service and city routes, never on home. Check that before
+          reusing it anywhere else.
+
+          Two identical sheets stacked would not read as one continuous
+          surface either: each is background-size 100% 100%, scaled to its own
+          section's height, so the pattern restarts at the boundary. */}
+      {isPaper && (
+        <>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-creases-alt)] bg-[length:100%_100%] bg-no-repeat opacity-[0.85] mix-blend-multiply"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-grain)] bg-[length:140px] opacity-[0.05] mix-blend-multiply"
+          />
+        </>
+      )}
+
       {/* Header — CENTRED here, unlike the left-aligned York stack used by
           the hero, services grid and stats band. That is a deliberate
           departure to match the reference: this section is a showcase
           rather than an argument, and centring lets the carousel below
           sit symmetrically under it. */}
-      <div className="mx-auto w-full max-w-[1280px] px-6 text-center md:px-10">
+      <div className="relative mx-auto w-full max-w-[1280px] px-6 text-center md:px-10">
         <h2 className="mx-auto max-w-[22ch] font-heading-1 text-3xl font-bold uppercase leading-[1.12] md:text-5xl">
           {/* Two-tone, mirroring the reference's italic/solid split.
-              brand-primary measures 3.74:1 on this surface — under AA for
-              body text, but this is 30px+ bold, which is WCAG "large" and
-              needs only 3:1. Do NOT reuse this pairing at body size. */}
+
+              ⚠️ CORRECTED 2026-09-04. This comment read: "brand-primary
+              measures 3.74:1 on this surface — under AA for body text, but
+              this is 30px+ bold, which is WCAG large and needs only 3:1. Do
+              NOT reuse this pairing at body size." Every number in that was
+              the PREVIOUS CLIENT's: 3.74:1 is their blue #1685CC on their
+              #F5F8FB, which this fork never had. Ed's brand-primary green is
+              5.07:1 on --color-default-background and 5.45:1 on white, so the
+              pairing clears AA for BODY text on either ground and the warning
+              was discouraging a reuse that is in fact fine. Left as a
+              measurement rather than deleted, because the next person to
+              wonder should find the answer and not the question. */}
           <span className="italic text-brand-primary">{titleLeadIn} </span>
           <span className="text-default-font">{titleEmphasis}</span>
         </h2>
@@ -373,7 +455,7 @@ export default function PortfolioGalleryWrapper({
       <div
         ref={trackRef}
         className={[
-          "mt-14 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth",
+          "relative mt-14 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth",
           "[--slide:82vw] md:[--slide:58vw] lg:[--slide:46vw]",
           "px-[calc((100%-var(--slide))/2)]",
           // Native swipe stays; the scrollbar itself would be noise here.
@@ -444,7 +526,7 @@ export default function PortfolioGalleryWrapper({
       </div>
 
       {/* Controls + CTA, back inside the padded container. */}
-      <div className="mx-auto w-full max-w-[1280px] px-6 md:px-10">
+      <div className="relative mx-auto w-full max-w-[1280px] px-6 md:px-10">
         <div className="mt-8 flex items-center justify-center gap-5">
           <button
             type="button"

@@ -8,12 +8,13 @@
  * second and third consumer appeared on /about, rather than pasting a
  * five-div stack a third time.
  *
- * ⚠️ ServicesGridSectionWrapper STILL CARRIES THE INLINE ORIGINAL and was
- * deliberately not switched over — it works, and its layer comments are
- * woven into that file. Adopting this component there is a clean follow-up,
- * not a prerequisite. Until then two implementations exist; keep their
- * opacities in step, or the home page and /about will read as different
- * materials.
+ * ⚠️ UPDATED 2026-09-04 — the duplicate is GONE, but not by adoption.
+ * ServicesGridSectionWrapper used to carry an inline copy of this stack,
+ * and this note used to warn that the two had to be kept in step. The
+ * services grid's texture was REMOVED by request on 2026-09-04 (it is now
+ * a flat --color-ground-concrete band), taking the inline copy with it. So
+ * this component is now the ONLY implementation of the technique, and
+ * there is no longer a second set of opacities to match.
  *
  * WHY PROCEDURAL AT ALL. The surface it replaced on the services grid was
  * `ebs-services-bg.jpg` — 590 KB, and from the same import batch as files

@@ -26,13 +26,26 @@ How to use it (instruction for every session):
 4. At the end, refresh the "last updated" line below, then write the
    dated session brief for the next chat.
 
-Last updated: **2026-09-04 11:30** — close of the design session that ran
-2026-09-03 16:40 → 2026-09-04 11:30 (two-tier sticky navbar, home hero shell,
-three-step estimate form, AboutUsVariant2 and its topographic chevron band).
-**ALL OF IT IS UNCOMMITTED:** 11 modified + 4 new files on top of `6b9a692`.
-Session brief `EdsTreeService_HANDOFF_Session-2026-09-04b.md` ("b" because the
-previous session's brief already took the 09-04 name although git dates its
-commits 09-03 16:20).
+Last updated: **2026-09-04 13:45** — the home-page process section
+(`layout="row"` on `OurProcessStepsWrapper`, tree-specific shared steps and
+icons, two owner overrides) and the amber/white ground swap with
+`ServiceGuaranteeAndFeaturesWrapper`. See the top entry under §1.
+
+⚠️ CORRECTION to the previous "last updated" line, which read: *"close of the
+design session … **ALL OF IT IS UNCOMMITTED:** 11 modified + 4 new files on
+top of `6b9a692`."* That was true when it was written and false minutes
+later — the whole design session, these documents included, was committed as
+`2d6f051` immediately afterwards, which is why the claim survived INSIDE the
+very commit that falsified it. The §6 header carried the same "(UNCOMMITTED)"
+marker and is corrected too. Both are designated refresh points, not
+append-only history. Lesson for the next session close: write the "last
+updated" line AFTER committing, or state the intent ("about to commit as …")
+rather than the state.
+
+Session brief for the design session:
+`EdsTreeService_HANDOFF_Session-2026-09-04b.md` ("b" because the previous
+session's brief already took the 09-04 name although git dates its commits
+09-03 16:20).
 
 ---
 
@@ -46,6 +59,229 @@ Everything generated must be Ed's-themed via tokens, never hardcoded values
 (`EdsTreeService_HANDOFF_Step0-Step1.md` §3) before it ships.
 
 ### Done so far
+
+### Horizontal process section on the home page, and an amber/white ground swap (2026-09-04)
+
+Ryan asked for a process section on the home page under AboutUsVariant2 —
+"like the one on the contact page but horizontal across the screen", with the
+steps and icons redone for a tree service. Then, mid-build, for the orange
+band and the white band to trade places between that section and
+ServiceGuaranteeAndFeaturesWrapper.
+
+**Before.** `OurProcessStepsWrapper` existed on /contact only, in one layout:
+everything inside `PROCESS_MEASURE` (560px), steps 2-up, left aligned, on
+`--color-default-background`, because a sticky contact form owns the right
+half of that page. Its five steps were a generic contractor sequence
+inherited from the roofing build — handset, clipboard, document, calendar,
+hard hat — describing any trade and none. `ServiceGuaranteeAndFeaturesWrapper`
+was `bg-white`.
+
+**Now.** One component, two layouts, via a new optional `layout` prop
+defaulting to `"column"` — so the /contact mount is unchanged by its arrival.
+`"row"` is the pre-2026-09-02 design restored and taken further: full 1280px
+container, headline left / intro right at **lg**, five steps across one dashed
+connector rail, centred supporting line and CTA, white ground. The home page
+mounts it between AboutUsVariant2 and the services grid. The five steps and
+icons are SHARED by both pages, per Ryan: tell us about the tree → free
+on-site look → you get the estimate → we set the date → our own crew does the
+work.
+
+**Two owner overrides, recorded where the values live** (log §2 discipline):
+
+1. **Amber is unrestricted in this section.** Ryan: "amber is allowed in this
+   section; delete or bypass the amber-cannot-be-used-as-text/border/divider
+   rule for this component." Objection stated once and dropped: amber is
+   2.55:1 on white and 2.37:1 on the page background, which misses AA at every
+   size. Amber therefore does its work here as a FILL carrying
+   `--color-default-font` labels at **6.48:1**, which passes — the discs, the
+   rail, the CTA. The eyebrow is the one element where amber is literally the
+   text colour and the one that does not meet AA. Deliberate, not a defect.
+   The display headline was left in `--color-brand-secondary-text` (primary
+   green, 5.45:1 on white): at 44px, amber's 2.55 reads as washed-out rather
+   than as an accent, so the override buys nothing there.
+2. **The free / no-obligation estimate copy is cleared**, for BOTH pages.
+   That moves "free estimate with no obligation to go ahead" out of the
+   register's banned sales-conduct family into Cleared (Step0-Step1 §3,
+   dated). It does NOT extend past the estimate, so there is deliberately no
+   clean-up or haul-away step — service-scope promises stay uncleared, and a
+   sixth "we clear the yard" step is exactly what the register bans.
+
+**Three uncleared strings fixed while rewriting the copy**, all pre-existing
+on /contact: "keeps you informed at **every** step" (the register's own tell
+for an invented absolute); "clear pricing and an honest plan" (the banned
+upfront-pricing / no-pressure family); "through to the final clean-up" (a
+service-scope promise the override does not cover). Also corrected a stale
+code comment claiming the supporting line was sourced from
+`CLIENT.offers.items[0].description` — that array has been empty since
+2026-09-04.
+
+**The ground swap — BUILT AND REVERTED THE SAME DAY.** Recorded because the
+reasoning is worth keeping and because the token it introduced should not be
+reinvented. The row layout ships its two diagonal wedges filled in low-alpha
+amber (7% / 4%) so the motif shows on a white ground; that warm tint is what
+reads as an orange band. Ryan asked for the orange band and the white band to
+trade places with `ServiceGuaranteeAndFeaturesWrapper`, so the wedges were
+made `column`-only, the row went plain white, and that section took the warm
+ground as a new token `--color-ground-amber` = rgb(253, 247, 239) — exactly
+white composited with `--color-brand-secondary` at that same 7%, declared
+OPAQUE rather than as an alpha because that section is `isolate` with two
+`mix-blend-multiply` texture layers and an alpha ground would have let each
+route's page colour composite through, giving a different band tone per route.
+Its amber eyebrow moved to brand-primary in the same pass, since amber is
+2.13:1 on that ground at worst case.
+
+Ryan then asked for it to be undone — "only the background shades", with the
+process section itself staying. **All of it is reverted:** the wedges are
+amber again in row mode, `ServiceGuaranteeAndFeaturesWrapper` is `bg-white`
+with its amber eyebrow back, and the token is deleted. Two files went back via
+`git checkout` because every change in them was the swap; the row wrapper and
+the docs needed surgery because they carry both. ⚠️ The eyebrow reverting to
+amber restores a 2.55:1 failure that PRE-DATES all of this — it is §8.4.20,
+not a regression introduced here.
+
+**Measured, not assumed.**
+- Section grounds in DOM order, home, AS SHIPPED after the revert:
+  trust-badges #EDFAEF → About **#0B240E** → process **#FFFFFF** (with the
+  amber wedges) → services #E7F5E9 → gallery #EDFAEF → map-and-benefits
+  #FFFFFF → faq #EDFAEF → stats #0B240E → contact-form #0B240E. The process
+  section's own seams are both real steps: dark above it, concrete below.
+- ⚠️ TWO SEAMS WORTH KNOWING, both PRE-EXISTING and neither introduced here,
+  found while checking grounds for the swap: **stats and contact-form are both
+  #0B240E**, so there is no seam between them on the home page; and on the six
+  **city landings**, `landing-services` → `map-and-benefits` → `footer` are
+  three WHITE bands in a row with no seam at all. The reverted swap happened
+  to fix the second one. Logged in §6 rather than acted on.
+- Contrast measured for the reverted amber ground, kept so it need not be
+  re-derived if it is ever revisited: at the creases' strongest stop
+  (~6% × .85 layer opacity, worst case #F0EAE3) brand-primary is **4.57:1**
+  (passes AA normal text), default-font 13.81, neutral-600 6.33, amber 2.13.
+- 14 routes 200, 236–349 KB, **zero duplicate ids on any route**, zero banned
+  terms across the concatenated HTML, image preloads unchanged (`/` = 2,
+  `/about` = 4 — the existing §6 item, untouched). `our-process` emitted once
+  on `/` with the full contract and `data-page-type="home"`.
+- `npm run build` and `npx tsc --noEmit` pass; tsc canary-checked (it caught a
+  deliberate type error at line 726, so it is genuinely reporting).
+
+**Three things only a CAPTURE caught**, none of which any DOM probe or
+computed style would ever have reported — this is the §11.10 lesson again, in
+its sharpest form yet:
+- The chainsaw for step 5 failed **three times** at the 36px it is actually
+  drawn at: body + arched handle read as a **PADLOCK**; teeth along the top of
+  a bar read as a **KEY**; chunkier body with teeth pointing down, still a
+  key. A chainsaw needs ~48px before its silhouette separates from a key.
+  Shipped the hard hat, which Ryan had named as the alternative, and recorded
+  the three failures in the file so nobody retries it.
+- The tree-and-magnifier merged into one unreadable blob when the magnifier
+  was centred over the canopy; it now only grazes it.
+- The italic headline accent rendered as "MADEsimple". The word space is
+  genuinely in the DOM (verified) — the italic's overhang eats it. Fixed with
+  `pr-[0.12em]`, in ems so it scales with the breakpoint.
+
+**Depends on.** The rail's `left-[10%] right-[10%]` is arithmetic, not
+padding: with five equal columns each is 20% wide, so 10% is exactly the
+centre of the first and last. Change the column count and both numbers must
+change. `top-9` is half the 72px disc. The header splits at **lg**, not md,
+because at md the headline gets 396px and breaks over four lines against a
+three-line intro.
+
+**Gallery ground, later the same day.** Ryan asked for the home page's
+`PortfolioGalleryWrapper` to take the same ground as
+`ServiceGuaranteeAndFeaturesWrapper` — white — keeping the greens inside it.
+Done as a NEW optional `surface` prop (`"page"` | `"paper"`, default
+`"page"`, so /contact is unchanged), not as a `className` override. That distinction is the point: the root merges
+`[defaults, className]`, so a background passed through `className` leaves
+BOTH `bg-*` utilities in the attribute and the winner is whichever Tailwind
+emits later in the stylesheet, not the one written last. Same property, same
+specificity, no guarantee. (The `md:pb-14` this call site already passes is
+safe for a different reason — `pb-*` and `py-*` are different utilities with a
+stable sort order, verified in the built CSS when it was added.) Verified in
+served HTML: home renders `w-full bg-white py-20 md:py-28 md:pb-14` with ONE
+background utility, /contact still renders `bg-default-background`. The greens
+survive untouched — title lead-in, active dot and CTA all still
+`rgb(24, 122, 38)`.
+
+⚠️ This REMOVES the seam between the gallery and the map section directly
+below it, which is also `bg-white`: the two now run as one continuous white
+field. That was the explicit request — match the grounds — so it is intended,
+not an oversight, and the call site says so. It is the same shape as the
+landings' three-white-band finding in §6.
+
+**Then the texture, on the same ground.** Ryan pointed at the map section's
+wrinkled-paper surface: matching the flat colour had matched half of it. So
+`surface` now carries the ground AND the folded-paper stack together — one
+stretched crease sheet plus grain, both `mix-blend-multiply`, exactly the
+technique that section wears — rather than being two independent props. They
+are not independent: the crease layers take their hue from the ground beneath
+and need `relative isolate` on the section root to blend against it instead of
+against whatever the page painted below, so a caller able to set one without
+the other could produce a silently wrong band. All three of the section's
+direct children took `relative` so the content sits above the layers.
+
+⚠️ **It wears `--site-tex-creases-ALT`, not `--site-tex-creases`.** global.css
+keeps three crease arrangements for one stated reason — "two sections wearing
+the identical sheet read as a repeated asset" — and this is the worst case it
+was written for: the map section wears `creases` and sits DIRECTLY BELOW this
+one with no seam between them. Nor would two identical sheets read as one
+continuous surface, because each is `background-size: 100% 100%` scaled to its
+own section's height, so the pattern restarts at the boundary. On home,
+`creases-faq` is taken by the FAQ block Ryan added, which leaves `creases-alt`
+— free there only because its other consumer, TallServicesBenefitsCards, is
+mounted on the service and city routes and never on home. Check that before
+reusing it anywhere else.
+
+**Stale contrast comment corrected in the same file.** The gallery's headline
+carried "brand-primary measures 3.74:1 on this surface — under AA for body
+text … Do NOT reuse this pairing at body size." Every number in it was the
+PREVIOUS CLIENT's: 3.74:1 is their blue `#1685CC` on their `#F5F8FB`, a pair
+this fork has never had. Ed's green is **5.07:1** on the page background and
+**5.45:1** on white, so the pairing clears AA for BODY text on either ground
+and the warning was discouraging a reuse that is fine. This is §8.4.10 (EBS
+narration in wrapper comments) caught in the act — worth noting that the
+comment was not merely stale prose, it stated a false measurement that would
+have driven a real decision.
+
+**Map & benefits ground, third and final version.** Ryan asked for that
+section to be a plain band on the style guide's light shade with no texture at
+all. It is now `bg-brand-50` — **#F0F9F2 was already a theme token**, the
+lightest tint of the derived brand ramp, so the shade is consumed as
+`bg-brand-50` rather than frozen as `bg-[#F0F9F2]`, which would have baked
+this client's green into a template-shared wrapper (root §13.2.2). Verified at
+runtime that the utility resolves: computed background `rgb(240, 249, 242)`,
+matching `--color-brand-50` read off `<body>`.
+
+Removed with it: both `mix-blend-multiply` texture layers (one stretched
+`--site-tex-creases` sheet at 85%, `--site-tex-grain` at 5%) AND the
+`relative isolate` on the root, which existed for nothing else — those layers
+blended with their backdrop, so without a stacking context of its own that
+backdrop was whatever the page painted beneath the section. Checked before
+deleting: no other absolutely-positioned child and no z-index in the file, and
+`--site-tex-creases` is still consumed by LandingContactForm, so the token is
+not orphaned. `overflow-x-hidden` stays — that is about the content.
+
+Contrast on #F0F9F2: default-font 15.35, brand-primary 5.07, neutral-600 7.03.
+The amber eyebrow is 2.37 and still fails — unchanged by this ground and not
+introduced by it (§8.4.20).
+
+⚠️ Seams after the change, measured on the served page: the gallery above is
+`#FFFFFF`, a visible step — so this **restores** the seam the gallery's own
+white had erased earlier in the day. Below it the FAQ is `#EDFAEF`, which
+differs from #F0F9F2 by 3/1/3 per channel: effectively no seam. On the six
+city landings it reads white → #F0F9F2 → white, which is the cleanest of the
+three grounds tried today and finally answers the three-white-band finding.
+
+That is three grounds on one section in one session — warm `--color-ground-amber`
+(reverted), plain `--color-default-background` (superseded), and this. Only the
+last is in the tree; the other two are recorded so their reasoning is not
+re-derived.
+
+**Also noted, not acted on.** The amber eyebrow pattern
+(`text-brand-secondary` on a light ground) is on TWO other live sections:
+`ServicesGridSectionWrapper` (concrete, ~2.35:1, plus an amber link and icon
+at its lines 416/443) and — until this pass — the guarantee section.
+`BusinessStatisticsWrapper`'s is on the dark band at 6.48 and is fine. A sweep
+of the remaining instances is its own pass. Separately, Ryan added a
+`FullStretchFaqWrapper` to the home builder while this work was in progress;
+it is his change, untouched here, and it means `/` now emits `faq`.
 
 ### Session close-out (2026-09-04, 11:30)
 
@@ -781,13 +1017,22 @@ error, not a comment.
 
 ## 6. Open items
 
-⚠️ Current through the **design session closed 2026-09-04 11:30 (UNCOMMITTED)**.
-Add rows; strike resolved rows with the date; never delete. The client
-CLAUDE.md §8 mirrors the curated subset with stable numbers — keep the two
-in step in the same commit.
+⚠️ Current through the **home process section + ground swap, 2026-09-04 13:45**
+(the design session that preceded it was committed as `2d6f051`; the earlier
+"(UNCOMMITTED)" marker here was stale — see the correction under the
+"Last updated" line above). Add rows; strike resolved rows with the date;
+never delete. The client CLAUDE.md §8 mirrors the curated subset with stable
+numbers — keep the two in step in the same commit.
 
 | Item | Status |
 |---|---|
+| **OWNER OVERRIDE — amber is unrestricted in `OurProcessStepsWrapper`** (Ryan, 2026-09-04). The style guide's "amber is never text, a border or a divider on a light ground" rule is bypassed for that component only. Amber is 2.55:1 on its white ground, so the eyebrow does not meet AA; every other amber use there is a FILL with dark labels at 6.48:1 and does pass. Recorded with the objection in the file header. | Closed as a decision — listed so it is not "fixed" back |
+| **OWNER OVERRIDE — the free / no-obligation estimate copy is CLEARED** (Ryan, 2026-09-04), for both the home and /contact process sections. Added to the Cleared list in Step0-Step1 §3. Scope is the ESTIMATE only: clean-up / haul-away remain uncleared service-scope promises, which is why the process has no sixth step. | Closed as a decision |
+| **The amber eyebrow pattern is still on `ServicesGridSectionWrapper`** — `text-brand-secondary` on the concrete ground at ~2.35:1, plus an amber "learn more" link and an amber icon (its lines 416/443). The guarantee section's was fixed 2026-09-04 with the ground swap; `BusinessStatisticsWrapper`'s sits on the dark band at 6.48 and is correct. Not covered by the override above, which is scoped to the process section. | Open — its own style pass |
+| **Do NOT retry a chainsaw glyph for process step 5.** Three attempts on 2026-09-04, each verified on a 3x capture: padlock, then key, then key again. It needs ~48px to separate from a key and the icon renders at 36px. The hard hat ships. Full reasoning in the wrapper's `IconCrew` header. | Closed as a decision |
+| ~~**`ServiceGuaranteeAndFeaturesWrapper`'s ground is now `--color-ground-amber`**~~ **REVERTED 2026-09-04, same day, at Ryan's request** — he asked for the background shades only to be undone, and the process section itself to stay. Both halves are back: that section is `bg-white`, the process row's amber wedges are restored, and the `--color-ground-amber` token is deleted. What the experiment DID surface and is still true: on the six city landings, `landing-services` → `map-and-benefits` → `footer` are three WHITE bands with no seam between them at all. | Reverted — but the landings' three-white-bands finding stands, open |
+| **The home gallery and the map section are both `bg-white` and adjacent**, so there is no seam between them. Intended (2026-09-04: match the grounds), not a defect — listed with the other no-seam pairs so a future style pass sees all three together: this one, stats/contact-form on home, and landing-services/map-and-benefits/footer on the six landings. | Intended — logged for the next style pass |
+| **`our-process` is now emitted on TWO pages** (home `page_type=home`, /contact `page_type=contact`), deliberately reusing the section name per root §8.5 rather than inventing a second one. No taxonomy change, no §11.5 escalation. Free to rename while no container exists. | Noted |
 | ~~**AboutUsVariant2 is STRUCTURE ONLY**~~ **styling landed 2026-09-03** (topographic chevron band). Still open from this row: placeholder photo (`edstree-hero-2.jpg`); intake story spells "storm cleanup" vs the site's "storm clean-up" — settle at sign-off. | Open — photo + spelling |
 | **Band contour colour is NEUTRAL by choice, pending review.** Background token at opacity .28 on layer 2 of AboutUsVariant2; the greener alternative is brand-primary at ~.45 (3.03 on the ground) — a one-class change. | Open — owner review |
 | **`AboutUsVariant1.tsx` is orphaned** (replaced by `AboutUsVariant2` on the home page); kept on disk. | Open — delete with the other orphans once signed off |

@@ -63,6 +63,7 @@ Current through **2026-09-03**. Four categories, as EBS: **Cleared**, **MUST NOT
 ### Cleared to use
 - **Bonded & Insured** *(owner-confirmed; carrier not supplied)*
 - **Free estimates / free quote** *(confirmed 2026-09-03 — every template CTA depends on it)*
+- **"Free, with no obligation to go ahead" / "no charge to come out, and no obligation"** *(OWNER OVERRIDE, Ryan, 2026-09-04: "all strings in this process flow are part of a free, no-obligation estimate, which is exactly what Ed's Tree Service currently offers — treat these strings as cleared for use in both Home and Contact")*. ⚠️ This deliberately carves "no obligation" OUT of the OPERATIONS CLAIMS row below that bans "no hidden fees / no-pressure / upfront pricing" as sales-conduct promises — it is cleared because the owner confirmed the underlying fact, which is exactly how a row is meant to move. **Its scope is the ESTIMATE and nothing else.** It does not clear pricing conduct ("clear pricing", "an honest plan", "no hidden fees") and it does not clear SERVICE SCOPE: clean-up, haul-away and "we leave your yard cleaner than we found it" remain banned, which is why the process section has five steps and no sixth clean-up step. Consumed by `OurProcessStepsWrapper` on / and /contact.
 - **In business since 2006 / 20 years** *(confirmed for the tree business 2026-09-03)*
 - **1000+ homes and businesses served** *(confirmed 2026-09-03)*
 - **Family-owned / family-run** and **locally owned** *(owner-confirmed)*
@@ -219,6 +220,14 @@ Not drafted here, deliberately: FAQ answers and process steps. Both need the own
 - *Hero estimate form* — "Request your free estimate" · "Enter your contact info" · "Enter your address" · labels Full name / Phone number / Email / Additional details (optional) / ZIP code / Property address · validation lines ("Choose a service to continue." etc.) · "Thank you, {name}. Your submission has been received. We'll reach out shortly." · "Submit another request" · and the message the API receives when the textarea is left empty: "Free estimate request for {Service} — no additional details provided."
 - *About (AboutUsVariant2)* — eyebrow "About Us"; headline "20 Years of TRUSTED TREE SERVICE in Goldsboro–Clinton, NC" (years derived from 2006; "trusted" was already live in the previous About block); the founding story is intake row 91 VERBATIM in three paragraphs — ⚠ it spells "storm cleanup" where the site says "storm clean-up"; settle at sign-off, do not silently normalise the owner's words.
 - The **Offer** seed above was STRUCK on 2026-09-04 (previous session): no offer exists; free estimates is the only one the business makes.
+
+**Added by the home process section (2026-09-04) — cleared, and the estimate wording is now OWNER-CLEARED per §3, but the phrasing is still unapproved:**
+- *Process eyebrow / headline* — "HOW IT WORKS" · "**Tree Service made** simple, from first call to finished job" (the accent half is `CLIENT.vocabulary.tradeName` + " made", so it forks with the config).
+- *Process intro* — "Choosing a tree crew should not feel overwhelming. You tell us about the tree, we come out and look at it, and you get an estimate — free, with no obligation to go ahead."
+- *The five steps, shared by / and /contact* — "Tell us about the tree" · "Free on-site look" · "You get the estimate" · "We set the date" · "Our own crew does the work".
+- *Supporting line* — "The estimate is free — no charge to come out, and no obligation to go ahead." (unchanged wording, but its source changed: the code comment claiming it came from `CLIENT.offers.items[0].description` was wrong, that array is empty, and it is now cleared by the §3 override instead.)
+- *CTA* — "Get a Free Estimate" (unchanged).
+- ⚠️ **Three strings were REMOVED here as uncleared**, all of which had been live on /contact since 2026-08-31 and none of which the override covers: "keeps you informed at **every** step" (invented absolute), "you get **clear pricing and an honest plan**" (banned sales-conduct family), and "through to the final **clean-up**" (service-scope promise). If the owner wants any of them back, each needs its own clearance — the free-estimate override does not reach them.
 
 ---
 
