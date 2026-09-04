@@ -1,6 +1,6 @@
 ﻿import React from "react";
 
-import NavbarMainWrapper from "../sections/NavbarMainWrapper";
+import NavbarTwoTierWrapper from "../sections/NavbarTwoTierWrapper";
 import ContactHeroHeader from "../sections/ContactHeroHeader";
 import ConcreteGround from "../sections/ConcreteGround";
 import ContactInfoColumnWrapper from "../sections/ContactInfoColumnWrapper";
@@ -31,10 +31,12 @@ const TRACKING = {
 export default function ContactPage() {
   return (
     <main className="w-full">
-      {/* Top navigation */}
-      <header id="top" className="w-full">
-        <NavbarMainWrapper {...TRACKING} />
-      </header>
+      {/* Top navigation — sticky two-tier header, IN FLOW. It renders its
+          own <header> landmark and must be a direct child of <main>: a
+          wrapper element of its own height would give position:sticky
+          nothing to travel inside (see the file header). id="top" is kept
+          from the <header> that stood here. */}
+      <NavbarTwoTierWrapper id="top" {...TRACKING} />
 
       {/* Hero */}
       <section id="hero" className="w-full">

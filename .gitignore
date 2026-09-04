@@ -26,3 +26,6 @@ pnpm-debug.log*
 .vercel/
 dist/
 .astro/
+
+# design-harness screenshots, profiles and generated sheets
+scripts/design-harness/out/

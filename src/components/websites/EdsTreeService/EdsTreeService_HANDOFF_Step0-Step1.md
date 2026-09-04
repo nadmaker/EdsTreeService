@@ -212,6 +212,14 @@ The "Bitter" alternate heading face is on file if positioning shifts toward tree
 
 Not drafted here, deliberately: FAQ answers and process steps. Both need the owner's account of how a job runs; generic drafts would invent operations claims.
 
+**Added by the design session (2026-09-03 → 2026-09-04) — cleared claims only, NONE owner-approved:**
+- *Navbar info bar* — "Need Tree Help? Call Us Now!" · "Phone:" · "Email:" (the visible email is the shared inbox, per config).
+- *Navbar CTA* — "Get A Free Quote" (desktop bar and the mobile overlay).
+- *Home hero* — h1 unchanged ("Same-day tree removal, done safely"); new strap "Tree removal, trimming, stump grinding & storm clean-up in Duplin, Sampson & Wayne Counties".
+- *Hero estimate form* — "Request your free estimate" · "Enter your contact info" · "Enter your address" · labels Full name / Phone number / Email / Additional details (optional) / ZIP code / Property address · validation lines ("Choose a service to continue." etc.) · "Thank you, {name}. Your submission has been received. We'll reach out shortly." · "Submit another request" · and the message the API receives when the textarea is left empty: "Free estimate request for {Service} — no additional details provided."
+- *About (AboutUsVariant2)* — eyebrow "About Us"; headline "20 Years of TRUSTED TREE SERVICE in Goldsboro–Clinton, NC" (years derived from 2006; "trusted" was already live in the previous About block); the founding story is intake row 91 VERBATIM in three paragraphs — ⚠ it spells "storm cleanup" where the site says "storm clean-up"; settle at sign-off, do not silently normalise the owner's words.
+- The **Offer** seed above was STRUCK on 2026-09-04 (previous session): no offer exists; free estimates is the only one the business makes.
+
 ---
 
 ## 8. EBS surfaces to strip or rewrite during the fork

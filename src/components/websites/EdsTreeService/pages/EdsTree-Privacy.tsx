@@ -1,6 +1,6 @@
 ﻿import React from "react";
 
-import NavbarMainWrapper from "../sections/NavbarMainWrapper";
+import NavbarTwoTierWrapper from "../sections/NavbarTwoTierWrapper";
 import PrivacyPolicyWrapper from "../sections/PrivacyPolicyWrapper";
 import FooterSection from "../sections/FooterSection";
 import { CLIENT } from "../config/client.config";
@@ -25,10 +25,12 @@ const TRACKING = {
 export default function PrivacyPage() {
   return (
     <main className="w-full">
-      {/* Top navigation */}
-      <header id="top" className="w-full">
-        <NavbarMainWrapper {...TRACKING} />
-      </header>
+      {/* Top navigation — sticky two-tier header, IN FLOW. It renders its
+          own <header> landmark and must be a direct child of <main>: a
+          wrapper element of its own height would give position:sticky
+          nothing to travel inside (see the file header). id="top" is kept
+          from the <header> that stood here. */}
+      <NavbarTwoTierWrapper id="top" {...TRACKING} />
 
       {/* Privacy Policy */}
       <PrivacyPolicyWrapper {...TRACKING} />

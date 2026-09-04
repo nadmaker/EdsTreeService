@@ -1,0 +1,56 @@
+[
+  { "name": "form-step1-1440", "url": "http://127.0.0.1:4399/", "width": 1440, "height": 1200,
+    "steps": [
+      { "click": "[data-label=hero-form-service-tree-removal]" },
+      { "eval": "({ checked: [...document.querySelectorAll('[role=radio]')].map(b => b.getAttribute('aria-checked')), cardBottom: document.querySelector('[data-form=hero-estimate-form]').getBoundingClientRect().bottom, heroBottom: document.querySelector('#hero').getBoundingClientRect().bottom, dl: (window.dataLayer||[]).map(e => e.event) })" }
+    ], "clip": { "x": 0, "y": 130, "width": 1440, "height": 900 } },
+  { "name": "form-step1-error-1440", "url": "http://127.0.0.1:4399/", "width": 1440, "height": 1200,
+    "steps": [
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "eval": "({ alert: document.querySelector('[data-form=hero-estimate-form] [role=alert]')?.textContent, title: document.querySelector('[data-form=hero-estimate-form] h2').textContent })" }
+    ], "clip": { "x": 380, "y": 440, "width": 680, "height": 620 } },
+  { "name": "form-step2-1440", "url": "http://127.0.0.1:4399/", "width": 1440, "height": 1200,
+    "steps": [
+      { "click": "[data-label=hero-form-service-stump-grinding]" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "eval": "({ title: document.querySelector('[data-form=hero-estimate-form] h2').textContent, focused: document.activeElement.tagName + ':' + document.activeElement.textContent.slice(0,30), current: document.querySelector('[aria-current=step]')?.textContent })" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "eval": "({ alertAfterEmptyNext: document.querySelector('[data-form=hero-estimate-form] [role=alert]')?.textContent })" }
+    ], "clip": { "x": 380, "y": 440, "width": 680, "height": 760 } },
+  { "name": "form-success-1440", "url": "http://127.0.0.1:4399/", "width": 1440, "height": 1200,
+    "steps": [
+      { "click": "[data-label=hero-form-service-tree-trimming]" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "eval": "(() => { const set = (sel, v) => { const el = document.querySelector(sel); const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; set('#hero-estimate-form-name', 'Ryan Lopez'); set('#hero-estimate-form-phone', '910-555-0100'); set('#hero-estimate-form-email', 'ryan@example.com'); return 'filled2'; })()" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "eval": "({ title: document.querySelector('[data-form=hero-estimate-form] h2').textContent, current: document.querySelector('[aria-current=step]')?.textContent })" },
+      { "eval": "(() => { const set = (sel, v) => { const el = document.querySelector(sel); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; set('#hero-estimate-form-zip', '28341'); set('#hero-estimate-form-address', '104 Johny B Tann Ln, Faison, NC'); window.__sent = null; window.fetch = async (url, init) => { window.__sent = { url, body: JSON.parse(init.body) }; return new Response(JSON.stringify({ ok: true, accepted: true }), { status: 200, headers: { 'content-type': 'application/json' } }); }; return 'filled3+mocked'; })()" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "wait": 600 },
+      { "eval": "({ heading: document.querySelector('[data-form=hero-estimate-form] h2')?.textContent, status: document.querySelector('[data-form=hero-estimate-form] [role=status]')?.textContent, sent: window.__sent, dl: (window.dataLayer||[]).map(e => e.event + (e.reason ? '(' + e.reason + ')' : '')), focused: document.activeElement.tagName })" }
+    ], "clip": { "x": 380, "y": 440, "width": 680, "height": 520 } },
+  { "name": "form-apierror-1440", "url": "http://127.0.0.1:4399/", "width": 1440, "height": 1200,
+    "steps": [
+      { "click": "[data-label=hero-form-service-storm-clean-up]" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "eval": "(() => { const set = (sel, v) => { const el = document.querySelector(sel); const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; set('#hero-estimate-form-name', 'Ryan'); set('#hero-estimate-form-phone', '9105550100'); set('#hero-estimate-form-email', 'ryan@example.com'); set('#hero-estimate-form-message', 'Two pines over the driveway.'); return 'ok'; })()" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "eval": "(() => { const set = (sel, v) => { const el = document.querySelector(sel); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; set('#hero-estimate-form-zip', '28341'); set('#hero-estimate-form-address', '104 Johny B Tann Ln'); window.fetch = async () => new Response(JSON.stringify({ ok: false, error: { code: 'server_misconfigured', message: 'Server email is not configured.' } }), { status: 500, headers: { 'content-type': 'application/json' } }); return 'mocked-500'; })()" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "wait": 600 },
+      { "eval": "({ alert: [...document.querySelectorAll('[data-form=hero-estimate-form] [role=alert]')].map(e => e.textContent), title: document.querySelector('[data-form=hero-estimate-form] h2').textContent, zipStillThere: document.querySelector('#hero-estimate-form-zip').value, dl: (window.dataLayer||[]).map(e => e.event) })" }
+    ], "clip": { "x": 380, "y": 440, "width": 680, "height": 560 } },
+  { "name": "form-back-1440", "url": "http://127.0.0.1:4399/", "width": 1440, "height": 1200,
+    "steps": [
+      { "click": "[data-label=hero-form-service-tree-removal]" },
+      { "click": "[data-form=hero-estimate-form] button[type=submit]" },
+      { "click": "[data-form=hero-estimate-form] button[type=button]" },
+      { "eval": "({ title: document.querySelector('[data-form=hero-estimate-form] h2').textContent, stillChecked: document.querySelector('[data-label=hero-form-service-tree-removal]').getAttribute('aria-checked') })" }
+    ], "clip": { "x": 380, "y": 440, "width": 680, "height": 200 } },
+  { "name": "form-step1-390", "url": "http://127.0.0.1:4399/", "width": 390, "height": 1500, "mobile": true,
+    "steps": [ { "click": "[data-label=hero-form-service-tree-removal]" }, { "eval": "({ docScroll: document.documentElement.scrollWidth })" } ],
+    "clip": { "x": 0, "y": 112, "width": 390, "height": 1000 } },
+  { "name": "form-step2-390", "url": "http://127.0.0.1:4399/", "width": 390, "height": 1500, "mobile": true,
+    "steps": [ { "click": "[data-label=hero-form-service-tree-removal]" }, { "click": "[data-form=hero-estimate-form] button[type=submit]" } ],
+    "clip": { "x": 0, "y": 380, "width": 390, "height": 760 } }
+]

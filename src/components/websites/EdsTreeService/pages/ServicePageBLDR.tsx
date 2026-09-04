@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import NavbarMainWrapper from "../sections/NavbarMainWrapper";
+import NavbarTwoTierWrapper from "../sections/NavbarTwoTierWrapper";
 import ServiceONEHeroWithRatingsWrapper from "../sections/ServiceONEHeroWithRatingsWrapper";
 
 import TallContentTruTempWrapper from "../sections/serviceOnecaption-photoWrapper";
@@ -59,7 +59,9 @@ export default function ServicePageBLDR({ page }: ServicePageBLDRProps) {
 
   return (
     <>
-      <NavbarMainWrapper
+      {/* Sticky two-tier header, in flow. Direct child of the island
+          (display:contents), so position:sticky travels against <body>. */}
+      <NavbarTwoTierWrapper
         quoteHref={contactHref}
         trackingCity={trackingCity}
         trackingService={trackingService}

@@ -1,9 +1,10 @@
 ﻿import React from "react";
 
-import NavbarMainWrapper from "../sections/NavbarMainWrapper";
-import HeroWrapper from "../sections/HeroWrapper";
+import NavbarTwoTierWrapper from "../sections/NavbarTwoTierWrapper";
+import HeroFormCardWrapper from "../sections/HeroFormCardWrapper";
+import HeroEstimateFormWrapper from "../sections/HeroEstimateFormWrapper";
 import TrustBadgesWrapper from "../sections/TrustBadgesWrapper";
-import AboutUsVariant1 from "../sections/AboutUsVariant1";
+import AboutUsVariant2 from "../sections/AboutUsVariant2";
 import BusinessStatisticsWrapper from "../sections/BusinessStatisticsWrapper";
 import ServiceGuaranteeAndFeaturesWrapper from "../sections/ServiceGuaranteeAndFeaturesWrapper";
 import ServicesGridSectionWrapper from "../sections/ServicesGridSectionWrapper";
@@ -34,18 +35,29 @@ const TRACKING = {
 export default function HomePage() {
   return (
     <main className="w-full">
-      {/* Top navigation */}
-      {/* heroBehind: the hero below is full-bleed and runs to y=0 behind the
-          fixed navbar, padding its own copy clear of it — so the navbar must
-          NOT render its desktop clearance spacer here. */}
-      <header id="top" className="w-full">
-        <NavbarMainWrapper heroBehind {...TRACKING} />
-      </header>
+      {/* Top navigation — sticky two-tier header, IN FLOW: the hero below
+          starts UNDER it rather than behind it, so the clearance spacer and
+          the heroBehind prop that suppressed it are both gone. The wrapper
+          renders its own <header> landmark and must be a direct child of
+          <main> — a wrapper element of its own height would give
+          position:sticky nothing to travel inside (see the file header).
+          id="top" is kept from the <header> that stood here. */}
+      <NavbarTwoTierWrapper id="top" {...TRACKING} />
 
-      {/* Hero */}
-      <section id="hero" className="w-full">
-        <HeroWrapper {...TRACKING} />
-      </section>
+      {/* Hero — background layer + heading + subheading + the centred
+          foreground card, which is the three-step estimate form passed
+          through the wrapper's `card` slot. The form owns the card surface
+          and reports as its own section (hero-form) with its own formId, so
+          it never collides with the page's bottom form (contact-form,
+          #home-contact). The hero wrapper owns its own <section>, so
+          id="hero" sits on it rather than nesting a section in a section
+          (nothing links to #hero — checked). HeroWrapper.tsx (the
+          three-slide carousel) is kept on disk, no longer composed. */}
+      <HeroFormCardWrapper
+        id="hero"
+        card={<HeroEstimateFormWrapper {...TRACKING} />}
+        {...TRACKING}
+      />
 
       {/*
         Section order is INTENT-ORDERED, not arbitrary. This page is both
@@ -100,17 +112,22 @@ export default function HomePage() {
 
           RENAMED 2026-08-31: this was ServiceAreaWrapper_v1_1, a name left
           over from content that moved out of it — the map, contact rows and
-          benefit tiles all live in the section further down now. The file is
-          AboutUsVariant1.tsx. ⚠️ It still EMITS data-section="service-guarantee";
-          the tracking key was deliberately not renamed with the file.
+          benefit tiles all live in the section further down now.
 
-          Surfaces still work at the new position, checked rather than
-          assumed. The section opens on solid white and lets the photo
-          emerge as you read down, so its BOTTOM edge is photo and meets
-          the services grid's bg-white as a clear seam. Above it,
-          trust-badges is bg-default-background, so the entry is off-white
-          into white — a softer line than the hero photo this scrim was
-          originally drawn against, but still a change of tone. */}
+          REPLACED 2026-09-03 (second session): the file is now
+          AboutUsVariant2.tsx — a plain two-column block, photo placeholder
+          left, very large headline + the intake founding story right.
+          STRUCTURE ONLY; the background/styling pass is next.
+          AboutUsVariant1.tsx is kept on disk with no consumer.
+          ⚠️ It still EMITS data-section="service-guarantee"; the tracking
+          key was deliberately not renamed with the file, and not with the
+          variant either.
+
+          Surfaces, for now: trust-badges above is bg-default-background,
+          this block is plain white, and the services grid below is ALSO
+          white — so there is currently NO seam between this section and
+          the grid. That is expected until the styling pass gives this
+          block its own ground; re-check the seam then. */}
       {/* ⚠️ ANCHOR CORRECTED 2026-08-30. This was id="service-area", but
           FooterSection links "Service Area" at #service-area and this
           wrapper holds the COMPANY STORY — the map lives in the section
@@ -122,7 +139,7 @@ export default function HomePage() {
           self-defaults an id, so these <section> wrappers ARE the anchors
           and cannot be dropped. */}
       <section id="guarantee" className="w-full">
-        <AboutUsVariant1 {...TRACKING} />
+        <AboutUsVariant2 {...TRACKING} />
       </section>
 
       {/* Services grid — answers "what exactly do you do".

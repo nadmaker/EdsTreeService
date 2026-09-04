@@ -374,24 +374,17 @@ export default function HeroWrapper({
 
       {/* Content — taller than the reference layout per request.
 
-          The md+ top padding carries the fixed navbar's clearance on top of
-          the section's own 8rem. The photo above deliberately runs to y=0
-          behind the resting bar; only the COPY needs to clear it, so the
-          clearance is padding here rather than a spacer above the section —
-          a spacer would push the photo down and lose the effect.
-
-          It is md-only because the bar is only fixed at >=768px; below that
-          the mobile header is still in normal flow (see NavbarMainWrapper).
-          The stack is justify-center, so on a tall viewport this mostly
-          re-centres slightly lower; its real job is guaranteeing clearance
-          on short viewports, where lg:min-h-[92vh] can leave the centred
-          block close to the top. */}
+          NO navbar clearance here any more. The header
+          (NavbarTwoTierWrapper) is sticky and IN FLOW, so this section
+          starts below it rather than running to y=0 behind it, and the copy
+          is centred on the section's own symmetric padding. The former
+          md:pt-[calc(8rem+var(--site-nav-clearance))] would now just push
+          the centred stack ~50px below centre for nothing. */}
       <div
         className={[
           "relative z-10 mx-auto flex w-full max-w-[1280px] flex-col justify-center",
           "min-h-[700px] px-6 py-24",
           "md:min-h-[880px] md:px-10 md:py-32",
-          "md:pt-[calc(8rem+var(--site-nav-clearance))]",
           "lg:min-h-[92vh]",
         ].join(" ")}
       >

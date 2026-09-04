@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import NavbarMainWrapper from "../sections/NavbarMainWrapper";
+import NavbarTwoTierWrapper from "../sections/NavbarTwoTierWrapper";
 import Landing1HeroWrapper from "../sections/Landing1-HeroWrapper";
 import LandingContactForm from "../sections/LandingContactForm";
 import CredentialBandWrapper from "../sections/CredentialBandWrapper";
@@ -46,13 +46,12 @@ export default function CityLandingPageBLDR({
 
   return (
     <>
-      {/* Global.
-          heroBehind: Landing1HeroWrapper is full-bleed and runs to y=0 behind
-          the fixed navbar, padding its own copy clear of it — so the navbar
-          must NOT render its desktop clearance spacer here. */}
-      <NavbarMainWrapper
+      {/* Global. Sticky two-tier header, in flow: the hero below starts
+          UNDER it rather than behind it, so heroBehind is gone with the
+          clearance spacer it used to suppress. Direct child of the island
+          (display:contents), so position:sticky travels against <body>. */}
+      <NavbarTwoTierWrapper
         quoteHref={contactHref}
-        heroBehind
         trackingCity={trackingCity}
         trackingService={trackingService}
         trackingPageType={trackingPageType}

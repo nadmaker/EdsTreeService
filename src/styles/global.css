@@ -149,6 +149,64 @@ body.theme-edstree {
   --site-tex-creases-alt: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.060'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='e' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.052'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.004'/%3E%3C/linearGradient%3E%3ClinearGradient id='f' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.056'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 640,0 0,470' fill='url(%23d)'/%3E%3Cpolygon points='1440,0 1440,340 970,0' fill='url(%23f)'/%3E%3Cpolygon points='0,900 1440,560 1440,900' fill='url(%23e)'/%3E%3Cpolygon points='300,0 550,0 1010,900 760,900' fill='url(%23d)'/%3E%3Cpolygon points='0,610 260,900 0,900' fill='url(%23f)'/%3E%3C/svg%3E");
   --site-tex-creases-faq: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1440' height='900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='p' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.058'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3ClinearGradient id='q' x1='1' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.054'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='.003'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='1' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='.050'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,0 380,0 900,900 520,900' fill='url(%23p)'/%3E%3Cpolygon points='380,0 700,0 1220,900 900,900' fill='url(%23q)'/%3E%3Cpolygon points='1440,0 1440,430 1010,0' fill='url(%23r)'/%3E%3Cpolygon points='1440,620 1440,900 1180,900' fill='url(%23p)'/%3E%3Cpolygon points='0,0 0,330 250,0' fill='url(%23q)'/%3E%3C/svg%3E");
 
+  /* ── Client slot: topographic contour MASK (AboutUsVariant2's dark field) ──
+     MONOCHROME BY CONTRACT. This SVG carries ALPHA ONLY; the line colour is
+     the consuming div's background-color, so a fork recolours the field by
+     changing a token and never re-encodes this. If a hex value ever appears
+     inside this data URI, that property is gone.
+
+     Consumed as mask-image, NOT background-image (root §7): the --site-tex-*
+     layers above recolour through mix-blend-multiply against a LIGHT ground,
+     which does nothing over a dark one; masking is the dark-ground equivalent
+     and needs no blend mode.
+
+     Recipe (each stage was tuned against the reference on a contact sheet):
+       feTurbulence fractalNoise 0.0084 / 3 octaves / seed 11 — heightfield
+       feColorMatrix                       — red channel → alpha, RGB forced white
+       feComponentTransfer linear 2.4/-0.7 — fractalNoise lives in ~0.3–0.7;
+                                              stretched so all levels are used
+       feComponentTransfer discrete ×13    — posterise into 12 flat elevation steps
+       feConvolveMatrix 3×3 Laplacian      — every step boundary becomes a line of
+                                              UNIFORM width (the discrete-band
+                                              recipe gave slope-dependent blobs)
+       feComponentTransfer linear ×6       — the faint boundary response → full alpha
+       feColorMatrix                       — keep alpha, RGB white again
+     Filter region x/y/width/height = the tile, or stitchTiles seams;
+     edgeMode='wrap' on the convolution keeps the tile seamless as well.
+
+     400px tile, baseFrequency 0.0084 = 0.006 × 560/400 (same feature scale as
+     a 560 tile). Cold raster cost scales with tile AREA, not octaves: 560px
+     ≈ 530–580 ms, 400px 373 ms, 320px 243 ms (headless software raster,
+     medians of 4, root §11.9 caveats) — so 320px is the next lever, never
+     fewer octaves. Never animate baseFrequency: it re-rasterises per frame. */
+  --site-tex-topo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='t' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0084' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='2.4' intercept='-0.7'/%3E%3C/feComponentTransfer%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0.000 0.083 0.167 0.250 0.333 0.417 0.500 0.583 0.667 0.750 0.833 0.917 1.000'/%3E%3C/feComponentTransfer%3E%3CfeConvolveMatrix order='3' kernelMatrix='-1 -1 -1 -1 8 -1 -1 -1 -1' preserveAlpha='false' edgeMode='wrap'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='6' intercept='0'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23t)'/%3E%3C/svg%3E");
+
+  /* ── Client slot: rake light for the DARK ground ──
+     --site-ground-rake above is a 0.9-white radial for light grounds and
+     would wash a dark field out. color-mix keeps this on the background token
+     (root §13.2.2). Hot spot at the chevron's inner vertex (44.5% / 50%).
+     Painted OVER the contour field; reversed, the effect flattens. */
+  --site-ground-rake-dark: radial-gradient(
+    62% 72% at 44.5% 50%,
+    color-mix(in srgb, var(--color-default-background) 11%, transparent) 0%,
+    color-mix(in srgb, var(--color-default-background) 4%, transparent) 46%,
+    transparent 74%
+  );
+
+  /* ── Client slot: chevron stops, DERIVED from the secondary ──
+     No new brand token (guide §5 argues against a tertiary; same logic).
+     The bevel tracks --color-brand-secondary automatically on every fork.
+     ⚠ Amber on the green-black ground (--color-default-font) is DELIBERATE
+     and cleared at 6.48 — it is the guide's own body-on-secondary pair read
+     the other way. The guide's "no amber inside green sections" rule is
+     about the PRIMARY greens (2.14 on primary, 2.83 on primary-hover),
+     which is exactly why the band's ground is default-font and not a green.
+     Do not "fix" the pairing into compliance with a rule it does not break. */
+  --site-chevron-face:  var(--color-brand-secondary);
+  --site-chevron-lit:   color-mix(in oklab, var(--color-brand-secondary) 72%, white);
+  --site-chevron-shade: color-mix(in oklab, var(--color-brand-secondary) 82%, black);
+  --site-chevron-ghost: color-mix(in oklab, var(--color-default-font) 55%, black);
+
   /* ── Typography (style guide §6) ──
      Zilla Slab 700 for H1/H2 and 600 for H3/H4; Public Sans 400/500/600.
      Loaded via the Google Fonts <link> in Layout.astro; the Zilla Slab 700
@@ -168,17 +226,19 @@ body.theme-edstree {
    4. Root-level clearance tokens and keyframes
    ========================================= */
 
-/* ── Fixed-navbar clearance ──
-   How far down the page the desktop navbar reaches at rest:
-   bar height 88px + top inset 16px (p-4) + 16px breathing room.
+/* ── Sticky-navbar clearance ──
+   How much of the viewport top the PINNED navbar covers once the page has
+   scrolled: the main bar's height (84px) + 16px breathing room. The info
+   bar above it scrolls away and is NOT counted — anchors and sticky rails
+   only matter after a scroll, by which point it is gone.
 
-   Defined once because FOUR places must agree, and they live in different
-   files — hardcoded, they drift apart silently:
-     1. the desktop clearance spacer      (NavbarMainWrapper.tsx)
-     2. hero top padding                  (HeroWrapper, Landing1-HeroWrapper)
-     3. scroll-padding-top for anchors    (below)
-     4. the service-page sticky rail      (ServicePageBLDR.tsx, EdsTree-Contact.tsx)
-   Change the bar height and every consumer follows.
+   Defined once because the consumers live in different files — hardcoded,
+   they drift apart silently:
+     1. scroll-padding-top for anchors    (below)
+     2. the two sticky rails              (ServicePageBLDR.tsx, EdsTree-Contact.tsx)
+   The heroes and the old clearance spacer no longer consume it: since the
+   header (NavbarTwoTierWrapper) is sticky and IN FLOW, nothing runs behind
+   it at rest. Change the main bar's height and every consumer follows.
 
    ⚠️ DECLARED ON <html>, NOT ON body.theme-edstree, and that is load-bearing.
    Custom properties inherit DOWNWARD only. scroll-padding-top has to sit on
@@ -190,14 +250,13 @@ body.theme-edstree {
    Scoped via :has() so a fork of this template does not inherit this
    client's value (root §7.5). */
 html:has(body.theme-edstree) {
-  --site-nav-clearance: 120px;
+  --site-nav-clearance: 100px;
 
-  /* Mobile equivalent. The mobile header is fixed too, but it is opaque and
-     a different height: py-4 (32px) + the h-16 logo (64px) + the 1px bottom
-     border = 97px. Consumed by the mobile clearance spacer in
-     NavbarMainWrapper and by scroll-padding-top below. Verify against the
-     rendered header height after any change to the mobile row. */
-  --site-mobile-nav-clearance: 97px;
+  /* Mobile equivalent: the mobile main row is h-[72px] in
+     NavbarTwoTierWrapper + 16px breathing room. Consumed by
+     scroll-padding-top below. Verify against the rendered row height after
+     any change to the mobile row. */
+  --site-mobile-nav-clearance: 88px;
 
   /* Anchor offset for MOBILE, where the header is also fixed. The desktop
      value overrides this inside the media query below. */
@@ -237,7 +296,7 @@ html:has(body.theme-edstree) {
   }
 }
 
-/* Anchor targets must clear the fixed desktop navbar.
+/* Anchor targets must clear the pinned desktop navbar.
 
    ~20 in-page anchor links across the page builders target ids that sit
    under the fixed bar once scrolled to. Nothing errors; the CTA simply
@@ -245,7 +304,7 @@ html:has(body.theme-edstree) {
    on each target so one rule cannot be forgotten when a new anchor is added.
    The scroll container is the root element, NOT <body>, so :has() is what
    scopes this to this client's theme. Only applies above the mobile
-   breakpoint, where the bar is fixed. */
+   breakpoint, where the desktop bar is the one that pins. */
 @media (min-width: 768px) {
   html:has(body.theme-edstree) {
     scroll-padding-top: var(--site-nav-clearance);

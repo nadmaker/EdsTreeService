@@ -127,13 +127,10 @@ export default function Landing1HeroWrapper({
     "min-h-[70vh] sm:min-h-[75vh] lg:min-h-[80vh]",
     "px-6 sm:px-10 lg:px-16 xl:px-24",
 
-    /* Clearance for the fixed desktop navbar. The background <img> below is
-       absolutely positioned to inset-0, so it still runs to y=0 behind the
-       resting bar — only the centred copy is pushed clear. md-only because
-       the bar is only fixed at >=768px. HeroSectionAlt2's root is
-       `items-center`, so this padding shifts the centred stack down rather
-       than adding dead space. */
-    "md:pt-[var(--site-nav-clearance)]",
+    /* No navbar clearance: the header (NavbarTwoTierWrapper) is sticky and
+       IN FLOW, so this section starts below it rather than behind it. The
+       former md:pt-[var(--site-nav-clearance)] would only shift the centred
+       stack down for nothing. */
 
     /* The Subframe root paints `bg-neutral-900`; the photograph now lives on
        the wrapper's own <section> beneath it, so this has to be transparent
