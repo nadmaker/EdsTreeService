@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CLIENT } from "@/components/websites/EdsTreeService/config/client.config";
+import ChevronBand from "./ChevronBand";
 
 /**
  * EBS — Portfolio gallery.
@@ -145,6 +146,38 @@ export interface PortfolioGalleryWrapperProps {
    */
   surface?: "page" | "paper";
 
+  /**
+   * The bevelled amber chevron band, ADDED 2026-09-04. Independent of
+   * `surface` on purpose: it is a foreground object, not a ground, and it
+   * would sit on either. Default off; the home page passes it, /contact
+   * does not.
+   *
+   * It is the About band's chevron MIRRORED — vertex pointing left into
+   * the section, arms exiting the right edge (sections/ChevronBand.tsx) —
+   * placed with its vertex at 68% × 70% of the section (About: 44.5% ×
+   * 50%): low enough that the vertex hides behind the centre slide and
+   * the arms emerge to its right, and low enough that the upper arm
+   * clears the header copy. That clearance is the load-bearing number:
+   * the italic lead-in is brand-primary, which is 2.14 on amber, so NO
+   * copy may ever sit over the chevron. Measured at the header's bottom:
+   * 1440px ≈ 220px of clearance, 1024px ≈ 53px.
+   *
+   * Below lg the header copy spans the full width (subtitle right edge 366
+   * of 390px), so the desktop rule cannot be used there. Instead the box is
+   * sized from the section's WIDTH (115%) and sits low, vertex at 72% ×
+   * 78%: it emerges from the right edge behind the carousel's lower-right
+   * corner and the next-arrow, and the upper arm's ink at the right edge
+   * stays ~210px below the header at 390px, ~110px at 768px (stroke edge,
+   * not centreline). Same element, `lg:` variants switch the geometry.
+   *
+   * ⚠️ Turning it on also puts `overflow-hidden` on the root. The chevron
+   * box is 130% of the section's height and hangs off the right edge;
+   * unclipped it widened the DOCUMENT to 2088px at 1440 and painted into
+   * the sections above and below. The carousel is unaffected — the track
+   * clips its own overflow.
+   */
+  chevron?: boolean;
+
   /** Content */
   titleLeadIn?: string;
   titleEmphasis?: string;
@@ -175,6 +208,7 @@ export default function PortfolioGalleryWrapper({
   id,
   className,
   surface = "page",
+  chevron = false,
   titleLeadIn = "See our tree work across",
   titleEmphasis = CLIENT.geo.serviceArea,
   subtitle,
@@ -337,6 +371,11 @@ export default function PortfolioGalleryWrapper({
 
   const isPaper = surface === "paper";
 
+  /* Both the paper layers (mix-blend-multiply) and the chevron (absolute,
+     oversized) need a stacking context of their own on the root; the
+     chevron additionally needs the root to CLIP — see the prop comment. */
+  const positioned = isPaper || chevron;
+
   return (
     <section
       id={id}
@@ -347,7 +386,9 @@ export default function PortfolioGalleryWrapper({
         // blend with their BACKDROP; without a stacking context of its own
         // that backdrop is whatever the page painted underneath this section.
         // Same reasoning as ServiceGuaranteeAndFeaturesWrapper's root.
-        isPaper ? "relative isolate bg-white" : "bg-default-background",
+        isPaper ? "bg-white" : "bg-default-background",
+        positioned ? "relative isolate" : "",
+        chevron ? "overflow-hidden" : "",
         "py-20 md:py-28",
         className,
       ]
@@ -392,6 +433,26 @@ export default function PortfolioGalleryWrapper({
             className="pointer-events-none absolute inset-0 bg-[image:var(--site-tex-grain)] bg-[length:140px] opacity-[0.05] mix-blend-multiply"
           />
         </>
+      )}
+
+      {/* ── CHEVRON BAND (opt-in) ─────────────────────────────────────────
+          Above the paper layers, below the content (the header, track and
+          controls are `relative` and later in DOM, so they stack over it).
+          Mirrored: vertex points LEFT and sits at 28% of the box, so
+          left-[…%] + -translate-x-[28%] puts it at that % of the section.
+
+          TWO GEOMETRIES, one element. Below lg the box is sized from the
+          section's WIDTH (115%) and sits low (72% × 78%); from lg it is
+          sized from the HEIGHT (130%) at 68% × 70%. The desktop rule cannot
+          simply be un-hidden on phones: 130% of a ~950px-tall section on a
+          390px screen makes the arm ~200px thick and fills the whole right
+          side with amber. See the prop comment for the copy clearance. */}
+      {chevron && (
+        <ChevronBand
+          mirror
+          idPrefix="gallery-chevron"
+          className="left-[72%] top-[78%] aspect-square h-auto w-[115%] -translate-x-[28%] -translate-y-1/2 lg:left-[68%] lg:top-[70%] lg:h-[130%] lg:w-auto"
+        />
       )}
 
       {/* Header — CENTRED here, unlike the left-aligned York stack used by

@@ -67,7 +67,8 @@ try {
       loaded = false;
       await send("Page.navigate", { url });
       for (let i = 0; i < 100 && !loaded; i++) await sleep(100);
-      for (let i = 0; i < 50; i++) { if ((await evaluate("document.querySelectorAll('astro-island[ssr]').length")) === 0) break; await sleep(100); }
+      // Same hydration wait as shots.mjs: islands gain `client-render-time` once React has committed.
+      await evaluate("new Promise((r) => { const t0 = Date.now(); const t = setInterval(() => { const isl = [...document.querySelectorAll('astro-island')]; if (!isl.length || isl.every((i) => i.hasAttribute('client-render-time'))) { clearInterval(t); r(true); } else if (Date.now() - t0 > 15000) { clearInterval(t); r(false); } }, 100); })");
       if (prepare) await evaluate(prepare);
       await evaluate("document.fonts.ready.then(() => true)");
       await sleep(700);

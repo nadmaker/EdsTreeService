@@ -217,12 +217,16 @@ export const CLIENT = {
   // tuned for search volume, which may differ from the service-area label.
   seo: {
     regionLabel: "Goldsboro–Clinton, NC",
-    // Site-wide social share image. ⚠️ NOT A FILE IN public/ — a PRERENDERED
-    // ROUTE. src/pages/og/default.jpg.ts renders og/SocialShareCard.tsx to a
-    // 1200x630 JPEG once per build (photo + logo from public/images, the
-    // heading font vendored in og/fonts). Store a ROOT-RELATIVE path —
-    // Layout.astro absolutizes it against the request origin (root §4.6).
-    ogImage: "/og/default.jpg",
+    // Site-wide social share image — the owner's supplied artwork, fitted to
+    // the 1200x630 preview box by `node scripts/og-image.mjs`. Store a
+    // ROOT-RELATIVE path; Layout.astro absolutizes it against the request
+    // origin (root §4.6).
+    //
+    // This REPLACED the generated card at /og/default.jpg (a prerendered
+    // route, src/pages/og/default.jpg.ts, rendering og/SocialShareCard.tsx).
+    // That route still builds and still works — it is simply no longer
+    // referenced. Point this back at "/og/default.jpg" to return to it.
+    ogImage: "/images/edstree-social-share.jpg",
   },
 
   // ─── Site / API identity ──────────────────────────────────────────────────

@@ -79,8 +79,12 @@ A/B for `trace.mjs`), `band-proposal.md` (the plan-mode deliverable).
 - **`--disable-gpu` means software raster.** `RasterTask` numbers are
   relative levers (tile area, layer count), not production truth; report
   medians and mins across runs, never a single run (root CLAUDE.md §11.9).
-- **Astro hydration:** wait until `astro-island[ssr]` count is 0 before
-  injecting DOM into an island, or React's hydration will replace it.
+- **Astro hydration:** use the `hydrated` step before injecting DOM into an
+  island, or React's hydration will replace what you injected. It waits for
+  every `astro-island` to carry `client-render-time` (this Astro build never
+  sets an `ssr` attribute — the first version of the step polled for it and
+  was a no-op, which is how a cold-load capture came back blank). Cold
+  hydration measured ~2.5 s; the step is bounded at 15 s.
 - **A killed harness leaves headless Edge running** on its port; the next run
   then attaches to the OLD instance. Kill by command line
   (`remote-debugging-port=9333`) — and note that a PowerShell process whose

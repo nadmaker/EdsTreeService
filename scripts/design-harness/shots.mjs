@@ -126,7 +126,14 @@ try {
           const p = isAbsolute(st.script) ? st.script : resolve(scenarioDir, st.script);
           await evaluate(readFileSync(p, "utf8") + "; true");
         }
-        else if (st.hydrated) { for (let i = 0; i < 50; i++) { if ((await evaluate("document.querySelectorAll('astro-island[ssr]').length")) === 0) break; await sleep(100); } }
+        else if (st.hydrated) {
+          // Astro 5 does NOT leave an `ssr` attribute to poll; each island
+          // gains `client-render-time` once React has committed. Cold loads
+          // measured ~2.5 s, so the bound is generous. Injecting BEFORE this
+          // resolves lets hydration wipe the injected nodes.
+          const t = await evaluate("new Promise((r) => { const t0 = Date.now(); const t = setInterval(() => { const isl = [...document.querySelectorAll('astro-island')]; if (!isl.length || isl.every((i) => i.hasAttribute('client-render-time'))) { clearInterval(t); r(Date.now() - t0); } else if (Date.now() - t0 > 15000) { clearInterval(t); r(-1); } }, 100); })");
+          if (t < 0) console.log(name, "hydration: TIMED OUT after 15s");
+        }
         else if (st.wait) await sleep(st.wait);
       } catch (err) { console.log(name, "STEP FAILED:", String(err.message).slice(0, 220)); }
     }

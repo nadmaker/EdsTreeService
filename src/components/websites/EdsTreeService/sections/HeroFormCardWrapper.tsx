@@ -90,7 +90,8 @@ function PlaceholderCard() {
 export default function HeroFormCardWrapper({
   id,
   className,
-  title = "Same-day tree removal, done safely",
+  // Title case by request (2026-09-04); the words are the same cleared draft.
+  title = "Same-Day Tree Removal, Done Safely",
   subtitle = `Tree removal, trimming, stump grinding & storm clean-up in ${CLIENT.geo.serviceArea}`,
   backgroundImage = BACKGROUND_IMAGE,
   imageAlt = "",
@@ -121,10 +122,19 @@ export default function HeroFormCardWrapper({
         className="absolute inset-x-0 top-0 bottom-16 overflow-hidden md:bottom-24"
         aria-hidden={imageAlt ? undefined : true}
       >
+        {/* object-position pulls the crop UP from the default 50% centre.
+            The photograph is portrait (1322×1984) inside a wide, short
+            layer, so object-cover throws away ~1500px of height at 1440w
+            and the centred band landed on the climber's legs and boots.
+            30% raises the visible band to roughly source rows 413–1021 —
+            helmet, shoulders and the cut log face — which is the subject.
+            Percentages, so the framing holds as the layer's width changes;
+            on phones the layer is height-constrained (the crop is
+            horizontal there) and this value has no effect. */}
         <img
           src={backgroundImage}
           alt={imageAlt}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-[50%_30%]"
           loading="eager"
           decoding="async"
           fetchPriority="high"

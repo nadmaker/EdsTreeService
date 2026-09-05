@@ -1,5 +1,6 @@
 import React from "react";
 import { CLIENT } from "@/components/websites/EdsTreeService/config/client.config";
+import ChevronBand from "./ChevronBand";
 
 /**
  * Ed's — About Us, variant 2: the topographic chevron band.
@@ -55,6 +56,9 @@ import { CLIENT } from "@/components/websites/EdsTreeService/config/client.confi
  *   the whole chevron shrinking to fit — a shrunken chevron is a smudge.
  *   No JS measurement: the percentages are the section's, the translate is
  *   the box's own.
+ * · The chevron itself is the shared ChevronBand (sections/ChevronBand.tsx,
+ *   extracted 2026-09-04 when the gallery became its second consumer);
+ *   geometry and gradient reasoning live there. This file owns placement.
  * · One polyline for the chevron body, not two arms: a miter join gives
  *   the sharp vertex for free, and the userSpaceOnUse gradient runs along
  *   the light direction, so the two arms still read as lit differently.
@@ -99,26 +103,6 @@ const FOUNDING_STORY: readonly string[] = [
   "Eduardo's approach is straightforward: safety first, bonded and insured, and a written estimate before anything starts. Every job leaves a yard behind that carries the company name long after the trucks pull out, and it gets done that way.",
 ];
 
-/*
- * Chevron geometry on a 1000×1000 viewBox. Base polyline P0(200,120)
- * V(720,500) P2(200,880), stroke 150. The bevel strokes are the same
- * polyline offset along the normals: for an offset t, the vertex moves to
- * (720 − t/sin α, 500) with sin α = 0.590 (α = the arm's angle to the
- * bisector, tan α = 380/520) and each end moves by t·(−0.590, ±0.807).
- *   t = +62 (inside, the specular)  → 163.4,170  614.9,500  163.4,830
- *   t = −66 (outside, the shade)    → 238.9,66.7 831.9,500  238.9,933.3
- * The ghost is the base translated (−40, −40).
- */
-const CHEVRON_BASE = "200,120 720,500 200,880";
-const CHEVRON_SPECULAR = "163.4,170 614.9,500 163.4,830";
-const CHEVRON_SHADE = "238.9,66.7 831.9,500 238.9,933.3";
-
-/* Gradient ids. Static, not useId(): the band must stay hook-free, and this
-   section renders once per page (a second instance would need a prefix
-   prop). */
-const GRAD_FACE = "about2-chevron-face";
-const GRAD_SPECULAR = "about2-chevron-specular";
-
 export interface AboutUsVariant2Props {
   id?: string;
   className?: string;
@@ -154,80 +138,6 @@ const DEFAULT_TITLE = (
     <span className="text-brand-primary">Trusted Tree Service</span> in {CLIENT.seo.regionLabel}
   </>
 );
-
-/**
- * Layer 4 — the chevron. Fills resolve var() against the DOM, which is the
- * reason this is inline markup and not a data-URI token like the contour
- * field. Colours are set through style (CSS properties), not presentation
- * attributes, so var() resolves in every engine.
- */
-function Chevron() {
-  return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      viewBox="0 0 1000 1000"
-      className="pointer-events-none absolute left-[44.5%] top-1/2 hidden aspect-square h-[130%] w-auto -translate-x-[72%] -translate-y-1/2 md:block"
-    >
-      <defs>
-        {/* Face: lit at the top-left, shaded at the bottom-right, along the
-            light direction — so the upper arm reads lit and the lower arm
-            reads in shade, which is most of what makes it a solid object. */}
-        <linearGradient id={GRAD_FACE} gradientUnits="userSpaceOnUse" x1="150" y1="80" x2="760" y2="920">
-          <stop offset="0" style={{ stopColor: "var(--site-chevron-lit)" }} />
-          <stop offset="0.42" style={{ stopColor: "var(--site-chevron-face)" }} />
-          <stop offset="1" style={{ stopColor: "var(--site-chevron-shade)" }} />
-        </linearGradient>
-        {/* Specular: brightest ~45% along the arm, fading toward the ends. */}
-        <linearGradient id={GRAD_SPECULAR} gradientUnits="userSpaceOnUse" x1="200" y1="500" x2="720" y2="500">
-          <stop offset="0" style={{ stopColor: "var(--site-chevron-lit)", stopOpacity: 0 }} />
-          <stop offset="0.45" style={{ stopColor: "var(--site-chevron-lit)", stopOpacity: 0.95 }} />
-          <stop offset="1" style={{ stopColor: "var(--site-chevron-lit)", stopOpacity: 0.35 }} />
-        </linearGradient>
-      </defs>
-
-      {/* Ghost chevron — the dark one sitting behind, offset up-left. */}
-      <polyline
-        points={CHEVRON_BASE}
-        transform="translate(-40 -40)"
-        fill="none"
-        strokeWidth="150"
-        strokeLinejoin="miter"
-        strokeMiterlimit="10"
-        opacity="0.85"
-        style={{ stroke: "var(--site-chevron-ghost)" }}
-      />
-      {/* Body */}
-      <polyline
-        points={CHEVRON_BASE}
-        fill="none"
-        stroke={`url(#${GRAD_FACE})`}
-        strokeWidth="150"
-        strokeLinejoin="miter"
-        strokeMiterlimit="10"
-      />
-      {/* Outer bevel — shade along the outside edge */}
-      <polyline
-        points={CHEVRON_SHADE}
-        fill="none"
-        strokeWidth="12"
-        strokeLinejoin="miter"
-        strokeMiterlimit="10"
-        opacity="0.9"
-        style={{ stroke: "var(--site-chevron-shade)" }}
-      />
-      {/* Inner bevel — specular along the inside edge */}
-      <polyline
-        points={CHEVRON_SPECULAR}
-        fill="none"
-        stroke={`url(#${GRAD_SPECULAR})`}
-        strokeWidth="11"
-        strokeLinejoin="miter"
-        strokeMiterlimit="10"
-      />
-    </svg>
-  );
-}
 
 export default function AboutUsVariant2({
   id,
@@ -283,8 +193,15 @@ export default function AboutUsVariant2({
         className="pointer-events-none absolute inset-0 hidden bg-[image:var(--site-ground-rake-dark)] md:block"
       />
 
-      {/* 4 — chevron */}
-      <Chevron />
+      {/* 4 — chevron. The shared ChevronBand (sections/ChevronBand.tsx)
+          since 2026-09-04 — geometry, bevels and gradients live there; this
+          wrapper owns only the placement. Vertex at 72% of the box, so
+          left-[44.5%] + -translate-x-[72%] lands it on the panel's bottom
+          edge. */}
+      <ChevronBand
+        idPrefix="about2-chevron"
+        className="left-[44.5%] top-1/2 hidden aspect-square h-[130%] w-auto -translate-x-[72%] -translate-y-1/2 md:block"
+      />
 
       {/* 5 — light panel. Shallow diagonal: 48% at the top, 44.5% at the
           bottom (see the file header for why not steeper). */}

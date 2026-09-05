@@ -64,7 +64,22 @@ const DISPLAY_PHONE = CLIENT.contact.phoneDisplay;
 const EMAIL_HREF    = CLIENT.contact.emailHref;
 const DISPLAY_EMAIL = CLIENT.contact.email;
 
-const LOGO_URL = "/images/edstree-logo.png";
+/**
+ * The navbar mark — the owner's wordmark with the "ED'S" row centred over
+ * "TREE SERVICE" instead of flush left. Derived from edstree-logo.png by
+ * `node scripts/stack-logo.mjs`; regenerate rather than hand-editing if the
+ * owner supplies new artwork.
+ *
+ * Why the stacked cut here: BOTH bars centre the logo — desktop between the
+ * split menu groups, mobile between the call icon and the hamburger — and a
+ * wordmark whose top row is flush left reads as mis-centred in either, even
+ * when its box is perfectly centred. Same canvas as the source (725x269), so
+ * every rendered width is unchanged and no layout shifts.
+ *
+ * edstree-logo.png is still the mark elsewhere (footer, credential band, the
+ * og card generator), where it is NOT optically centred.
+ */
+const LOGO_URL = "/images/edstree-logo-stacked.png";
 
 /** Info-bar prompt, left of the phone. Not a claim — no register entry. */
 const TOPBAR_PROMPT = "Need Tree Help? Call Us Now!";
@@ -845,7 +860,7 @@ export default function NavbarTwoTierWrapper({
             ))}
           </div>
 
-          {/* Centred logo — the existing colour mark, sized to the bar. */}
+          {/* Centred logo — the stacked colour mark, sized to the bar. */}
           <a
             href="/"
             className="flex items-center justify-center px-3 lg:px-6"

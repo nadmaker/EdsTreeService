@@ -60,6 +60,79 @@ Everything generated must be Ed's-themed via tokens, never hardcoded values
 
 ### Done so far
 
+### Gallery chevron band over the paper ground, shared ChevronBand (2026-09-04, afternoon)
+
+Plan-mode brief → prototype by injection → approved on all five decisions →
+build. The About band's amber chevron now also emerges from the RIGHT of the
+home gallery, above the folded-paper ground the earlier 49a7f04 pass gave it.
+Uncommitted, undeployed.
+
+| | Before | Now |
+|---|---|---|
+| Chevron markup | local `Chevron()` inside AboutUsVariant2 | `sections/ChevronBand.tsx`, shared; About consumes it unmirrored with its original ids — served markup byte-identical (1,697 chars before and after) |
+| Gallery | paper ground only | `chevron` prop (default off; home passes it): mirrored chevron, vertex at 68% × 70%, box 130% of the section HEIGHT from lg; below lg (added the same afternoon on request) the same element switches to 115% of the section WIDTH at 72% × 78%; above the paper layers and below the content; root gains `overflow-hidden` |
+| /contact gallery | `surface="page"`, no chevron | unchanged — verified: no svg, root static, page background |
+| Harness | `hydrated` polled `astro-island[ssr]` (never set → no-op) | polls `client-render-time` on every island, bounded 15 s |
+
+**Why**
+
+- **Mirrored, not the un-mirrored `>` anchored right.** With the vertex
+  hanging off the right edge the arms cross the headline, and the italic
+  lead-in is brand-primary — 2.14 on amber, unfixable. Mirroring the POINTS
+  (x → 1000 − x) and the ghost's x-offset, but keeping the face gradient in
+  user space, keeps the light coming from the top-left on both bands: the
+  About chevron is lit at its arm ends, this one at its vertex.
+- **68% × 70%, not the 62% first tried.** At 1024 the 62%-high upper arm ran
+  behind the subtitle's last words. At 70% the vertex hides behind the
+  centre slide and the arms emerge to its right; measured clearance from the
+  arm's ink to the subtitle at the header's bottom: 1440 → 223px, 1024 →
+  54px. That number is now open item 8.4.22.
+- **Mobile is a second geometry, not an un-hide.** First cut was
+  `hidden lg:block` (at 768 the subtitle spans to 728 of 768px, so the
+  desktop placement cannot clear it); Ryan asked for a mobile version the
+  same afternoon. The desktop box is sized from the section's HEIGHT, and
+  130% of ~950px on a 390px screen makes the arm ~200px thick — a solid
+  amber right side. Below lg the same element is sized from the WIDTH
+  (115%) and sits low (vertex 72% × 78%), emerging behind the carousel's
+  lower-right corner and the next-arrow. Three placements were prototyped
+  by injection at 390; the chosen one keeps the arm's highest visible
+  ink ~210px below the header at 390 and ~110px at 768. One svg, `lg:`
+  variants switch the geometry.
+- **`overflow-hidden` on the root whenever the chevron is on.** The box is
+  130% of the section's height and hangs off the right edge; unclipped it
+  widened the DOCUMENT to 2088px at 1440 and painted into the sections above
+  and below. The carousel is unaffected (the track clips its own overflow).
+- **Extracted rather than duplicated** (root §6.4: reuse gets its own file).
+  ChevronBand renders only the svg; each caller owns placement, ground and
+  clipping. The gallery prop is separate from `surface` because the chevron
+  is a foreground object that sits on either ground.
+
+**Measured (2026-09-04, `astro dev` 4399, served HTML + headless Edge)**
+
+- About: the served `<svg>` extracted before and after the refactor is
+  byte-identical (1,697 chars, ids `about2-chevron-face/-specular`).
+- Home: one gallery chevron svg, ids `gallery-chevron-face/-specular`,
+  mirrored points `800,120 280,500 800,880`, ghost `translate(40 -40)`; no
+  hex in the markup; zero duplicate ids; root
+  `relative isolate overflow-hidden`. Computed at 1440: vertex 68.0% ×
+  70.0%, `documentElement.scrollWidth` 1440 (2088 without the clip),
+  ghost stroke resolves through oklab (the var() path works). 1024: clearance
+  54px, scrollWidth 1064 — the pre-existing marquee overflow, unchanged.
+  768 / 390: display none. /contact: no svg, root static, page background.
+- `npx tsc --noEmit` clean; `npm run build` clean.
+
+**Probes that lied, both now fixed in the harness or documented**
+
+1. The harness's `hydrated` step waited on `astro-island[ssr]`, which this
+   Astro build never sets, so it returned immediately; on a cold load the
+   injection landed BEFORE React committed (hydration measured at 2.5 s) and
+   hydration wiped the injected svg — a blank capture that looked like a
+   paint failure. It now waits for `client-render-time` on every island.
+2. A scripted range removal in AboutUsVariant2 (from the geometry comment to
+   the export) also took the props interface and DEFAULT_TITLE that sat in
+   between; tsc caught it at once. Range edits need both anchors AND a look
+   at what lies between them.
+
 ### Horizontal process section on the home page, and an amber/white ground swap (2026-09-04)
 
 Ryan asked for a process section on the home page under AboutUsVariant2 —
@@ -1026,6 +1099,7 @@ numbers — keep the two in step in the same commit.
 
 | Item | Status |
 |---|---|
+| **Gallery chevron clearance is copy-dependent.** Arm ink clears the subtitle by ~223px at 1440, ~54px at 1024, and (mobile geometry) ~210px at 390 / ~110px at 768 (ink edge) (brand-primary lead-in is 2.14 on amber). Re-measure with the harness after any header copy or type change on the gallery. | Open — re-check on copy change |
 | **OWNER OVERRIDE — amber is unrestricted in `OurProcessStepsWrapper`** (Ryan, 2026-09-04). The style guide's "amber is never text, a border or a divider on a light ground" rule is bypassed for that component only. Amber is 2.55:1 on its white ground, so the eyebrow does not meet AA; every other amber use there is a FILL with dark labels at 6.48:1 and does pass. Recorded with the objection in the file header. | Closed as a decision — listed so it is not "fixed" back |
 | **OWNER OVERRIDE — the free / no-obligation estimate copy is CLEARED** (Ryan, 2026-09-04), for both the home and /contact process sections. Added to the Cleared list in Step0-Step1 §3. Scope is the ESTIMATE only: clean-up / haul-away remain uncleared service-scope promises, which is why the process has no sixth step. | Closed as a decision |
 | **The amber eyebrow pattern is still on `ServicesGridSectionWrapper`** — `text-brand-secondary` on the concrete ground at ~2.35:1, plus an amber "learn more" link and an amber icon (its lines 416/443). The guarantee section's was fixed 2026-09-04 with the ground swap; `BusinessStatisticsWrapper`'s sits on the dark band at 6.48 and is correct. Not covered by the override above, which is scoped to the process section. | Open — its own style pass |

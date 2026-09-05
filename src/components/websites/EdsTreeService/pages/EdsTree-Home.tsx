@@ -241,6 +241,11 @@ export default function HomePage() {
         <PortfolioGalleryWrapper
           className="md:pb-14"
           surface="paper"
+          // chevron: the About band's amber chevron, mirrored, emerging from
+          // the right edge behind the carousel (2026-09-04). HOME ONLY, same
+          // as surface; the wrapper's prop comment has the placement maths
+          // and why it also clips the root.
+          chevron
           ctaHref="#home-contact"
           {...TRACKING}
         />
